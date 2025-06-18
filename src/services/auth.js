@@ -62,8 +62,8 @@ import fs from "node:fs/promises";
 
 export const registerUser = async (payload) => {
 	try {
-		const existing = await UsersCollection.findOne({ phone: payload.phone });
-		if (existing) throw createHttpError(409, "Phone in use");
+		const existing = await UsersCollection.findOne({ email: payload.email });
+		if (existing) throw createHttpError(409, "Email in use");
 
 		const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
@@ -88,6 +88,7 @@ export const registerUser = async (payload) => {
 		const result = {
 			name: createdUser.name,
 			phone: createdUser.phone,
+			email: createdUser.email,
 			accessToken: session.accessToken,
 			userId: session.userId,
 		};
@@ -101,7 +102,7 @@ export const registerUser = async (payload) => {
 
 export const loginUser = async (payload) => {
 	const user = await UsersCollection.findOne({
-		phone: payload.phone,
+		email: payload.email,
 	});
 	if (!user) {
 		throw createHttpError(404, "User not found");
@@ -128,6 +129,7 @@ export const loginUser = async (payload) => {
 	const result = {
 		name: user.name,
 		phone: user.phone,
+		email: user.email,
 		accessToken: createdSession.accessToken,
 		userId: createdSession.userId,
 	};

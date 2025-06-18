@@ -8,16 +8,12 @@ export const registerUserSchema = Joi.object({
 		.messages({
 			"string.pattern.base": `Phone number must be in format +380XXXXXXXXX`,
 		}),
+	email: Joi.string().email().required(),
 	password: Joi.string().required(),
 });
 
 export const loginUserSchema = Joi.object({
-	phone: Joi.string()
-		.pattern(/^\+380\d{9}$/)
-		.required()
-		.messages({
-			"string.pattern.base": `Phone number must be in format +380XXXXXXXXX`,
-		}),
+	email: Joi.string().email().required(),
 	password: Joi.string().required(),
 });
 
