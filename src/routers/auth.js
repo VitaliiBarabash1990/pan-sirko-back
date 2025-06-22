@@ -15,6 +15,7 @@ import {
 } from "../controllers/auth.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { requestResetEmailController } from "../controllers/contacts.js";
+import { sendEmailController } from "../controllers/fillers.js";
 
 const router = express.Router();
 const jsonParser = express.json();
@@ -35,6 +36,8 @@ router.post(
 router.post("/logout", ctrlWrapper(logoutUserController));
 
 router.post("/refresh", ctrlWrapper(refreshUserSessionController));
+
+router.post("/send-order", jsonParser, ctrlWrapper(sendEmailController));
 
 router.post(
 	"/send-reset-email",

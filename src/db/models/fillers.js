@@ -1,9 +1,11 @@
 import { model, Schema } from "mongoose";
 
+const allowedTypes = ["toys", "houses", "fillers"];
+
 const fillersSchema = new Schema(
 	{
 		img: { type: String, required: false },
-		imgsvg: { type: String, required: false },
+		article: { type: String, required: false },
 		stars: { type: Number, required: false },
 		text: { type: String, required: false },
 		description: { type: String, required: false },
@@ -21,6 +23,10 @@ const fillersSchema = new Schema(
 		wage: { type: Number, required: false },
 		volume: { type: Number, required: false },
 		country: { type: String, required: false },
+		qty: { type: String, required: false },
+		type_goods: { type: String, enum: allowedTypes, default: "fillers" },
+		isSale: { type: Boolean, required: false, default: false },
+		status: { type: Boolean, required: false },
 	},
 	{
 		timestamps: true,

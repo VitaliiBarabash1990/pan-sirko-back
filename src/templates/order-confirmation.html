@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="uk">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Нове замовлення</title>
+		<style>
+			body {
+				font-family: Arial, sans-serif;
+				line-height: 1.5;
+				color: #333;
+			}
+			h1 {
+				color: #2c3e50;
+			}
+			table {
+				width: 100%;
+				border-collapse: collapse;
+				margin-top: 20px;
+			}
+			th,
+			td {
+				border: 1px solid #ccc;
+				padding: 8px;
+				text-align: left;
+			}
+			th {
+				background-color: #f4f4f4;
+			}
+			.info-block {
+				margin-top: 15px;
+			}
+		</style>
+	</head>
+	<body>
+		<h1>Нове замовлення з сайту</h1>
+
+		<div class="info-block">
+			<p><strong>Дата замовлення:</strong> {{createdAt}}</p>
+
+			{{#if name}}
+			<p><strong>Ім'я:</strong> {{name}}</p>
+			{{/if}} {{#if phone}}
+			<p><strong>Телефон:</strong> {{phone}}</p>
+			{{/if}} {{#if city}}
+			<p><strong>Місто:</strong> {{city}}</p>
+			{{/if}} {{#if street}}
+			<p><strong>Вулиця:</strong> {{street}}</p>
+			{{/if}} {{#if house}}
+			<p><strong>Будинок:</strong> {{house}}</p>
+			{{/if}} {{#if department}}
+			<p><strong>Відділення:</strong> {{department}}</p>
+			{{/if}} {{#if post}}
+			<p><strong>Поштовий індекс:</strong> {{post}}</p>
+			{{/if}} {{#if address}}
+			<p><strong>Адреса:</strong> {{address}}</p>
+			{{/if}} {{#if method}}
+			<p><strong>Спосіб доставки:</strong> {{method}}</p>
+			{{/if}} {{#if payment}}
+			<p><strong>Оплата:</strong> {{payment}}</p>
+			{{/if}} {{#if comment}}
+			<p><strong>Коментар:</strong> {{comment}}</p>
+			{{/if}} {{#if call}}
+			<p><strong>Телефонний дзвінок:</strong> {{call}}</p>
+			{{/if}}
+		</div>
+
+		{{#if items}}
+		<h2>Список товарів</h2>
+		<table>
+			<thead>
+				<tr>
+					<th>Артикул</th>
+					<th>Назва</th>
+					<th>Опис</th>
+					<th>Кількість</th>
+					<th>Ціна (за одиницю)</th>
+					<th>Загальна ціна</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{#each items}}
+				<tr>
+					<td>{{article}}</td>
+					<td>{{text}}</td>
+					<td>{{description}}</td>
+					<td>{{qty}}</td>
+					<td>{{price}}</td>
+					<td>{{calcTotal price qty}}</td>
+				</tr>
+				{{/each}}
+			</tbody>
+		</table>
+		{{else}}
+		<p>Товари не вказані</p>
+		{{/if}}
+	</body>
+</html>

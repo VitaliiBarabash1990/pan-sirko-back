@@ -1,9 +1,11 @@
 import Joi from "joi";
 
+const allowedTypes = ["toys", "houses", "fillers"];
+
 // Schema for creating a filler
 export const createFillerSchema = Joi.object({
-	img: Joi.string().required().messages({ "any.required": "img is required" }),
-	imgsvg: Joi.string().optional(),
+	img: Joi.string().required(),
+	article: Joi.string().optional(),
 	stars: Joi.number().integer().min(0).max(5).required(),
 	text: Joi.string().required(),
 	description: Joi.string().required(),
@@ -21,6 +23,12 @@ export const createFillerSchema = Joi.object({
 	wage: Joi.number().positive().required(),
 	volume: Joi.number().positive().required(),
 	country: Joi.string().required(),
+	qty: Joi.string().optional(),
+	type_goods: Joi.string()
+		.valid(...allowedTypes)
+		.default("fillers"),
+	isSale: Joi.boolean().optional(),
+	status: Joi.boolean().optional(),
 });
 
 // Schema for updating a filler (all fields optional, just validation)

@@ -1,6 +1,12 @@
 import { SORT_ORDER } from "../constants/index.js";
 import { FillersCollection } from "../db/models/fillers.js";
 import { calculatePaginationData } from "../utils/calculatePaginationData.js";
+import { sendEmail } from "../utils/sendMail.js";
+import handlebars from "handlebars";
+import path from "node:path";
+import { SMTP, TEMPLATES_DIR } from "../constants/index.js";
+import fs from "node:fs/promises";
+import { env } from "../utils/env.js";
 
 export const getAllFillers = async () => {
 	const fillers = await FillersCollection.find();
@@ -42,4 +48,29 @@ export const updateFiller = async (fillerId, userId, payload, options = {}) => {
 		filler: rawResult.value,
 		isNew: Boolean(rawResult?.lastErrorObject?.upserted),
 	};
+};
+
+handlebars.registerHelper("calcTotal", (price, qty) => {
+	const total = Number(price) * Number(qty);
+	return total.toFixed(2);
+});
+
+export const requestSendEmail = async (order) => {
+	const orderTemplatePath = path.join(TEMPLATES_DIR, "order-confirmation.html");
+
+	const templateSource = (await fs.readFile(orderTemplatePath)).toString();
+
+	const template = handlebars.compile(templateSource);
+
+	const html = template({
+		...order,
+		createdAt: new Date().toLocaleString("uk-UA"),
+	});
+
+	await sendEmail({
+		from: env("SMTP_FROM"),
+		to: env("SMTP_OWNER_EMAIL"), // пошта власника магазину
+		subject: "Нове замовлення з сайту!",
+		html,
+	});
 };

@@ -4,6 +4,7 @@ import {
 	deleteFiller,
 	getAllFillers,
 	getFillerById,
+	requestSendEmail,
 	updateFiller,
 } from "../services/fillers.js";
 
@@ -57,7 +58,7 @@ export const createFillerController = async (req, res) => {
 
 	const filler = {
 		img: req.body.img,
-		imgsvg: req.body.imgsvg,
+		article: req.body.article,
 		stars: req.body.stars,
 		text: req.body.text,
 		description: req.body.description,
@@ -163,6 +164,16 @@ export const requestResetEmailController = async (req, res) => {
 	await requestResetToken(req.body.email);
 	res.json({
 		message: "Reset password email was successfully sent!",
+		status: 200,
+		data: {},
+	});
+};
+
+export const sendEmailController = async (req, res) => {
+	console.log(req.body);
+	await requestSendEmail(req.body); // передаємо весь об'єкт
+	res.json({
+		message: "Order was successfully sent to email!",
 		status: 200,
 		data: {},
 	});

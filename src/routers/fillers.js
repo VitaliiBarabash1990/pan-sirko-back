@@ -16,6 +16,7 @@ import {
 import { validateBody } from "../middlewares/validateBody.js";
 import { isValidId } from "../middlewares/isValidId.js";
 import { upload } from "../middlewares/multer.js";
+import { authenticate } from "../middlewares/authenticate.js";
 
 const router = express.Router();
 const jsonParser = express.json();
@@ -26,6 +27,7 @@ router.get("/:fillerId", isValidId, ctrlWrapper(getFillerByIdController));
 
 router.post(
 	"/",
+	authenticate,
 	// upload.single("photo"),
 	jsonParser,
 	validateBody(createFillerSchema),
