@@ -2,8 +2,10 @@ import createHttpError from "http-errors";
 import {
 	createFiller,
 	deleteFiller,
-	getAllFillers,
+	// getAllFillers,
 	getFillerById,
+	getFilteredFillers,
+	getTopSales,
 	requestSendEmail,
 	updateFiller,
 } from "../services/fillers.js";
@@ -13,13 +15,26 @@ import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { env } from "../utils/env.js";
 
+// export const getFillersController = async (req, res) => {
+// 	const fillers = await getAllFillers();
+
+// 	res.json({
+// 		status: 200,
+// 		message: "Successfully found filler!",
+// 		data: fillers,
+// 	});
+// };
+
 export const getFillersController = async (req, res) => {
-	const fillers = await getAllFillers();
+	const { type = "fillers", page = 1 } = req.query;
+
+	const { fillers, total } = await getFilteredFillers(type, parseInt(page, 10));
 
 	res.json({
 		status: 200,
-		message: "Successfully found filler!",
+		message: "Successfully found filtered fillers!",
 		data: fillers,
+		total,
 	});
 };
 
@@ -71,6 +86,7 @@ export const createFillerController = async (req, res) => {
 		benefits_text: req.body.benefits_text,
 		Regulations_title: req.body.Regulations_title,
 		Regulations_text: req.body.Regulations_text,
+		type_goods: req.body.type_goods,
 		brand: req.body.brand,
 		view: req.body.view,
 		wage: req.body.wage,
@@ -166,6 +182,26 @@ export const requestResetEmailController = async (req, res) => {
 		message: "Reset password email was successfully sent!",
 		status: 200,
 		data: {},
+	});
+};
+
+export const getTopSalesController = async (req, res) => {
+	const page = parseInt(req.query.page, 20) || 1;
+
+	const firstPageLimit = 2;
+	const nextPageLimit = 2;
+
+	const isFirstPage = page === 1;
+	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
+	const skip = isFirstPage ? 0 : firstPageLimit + (page - 2) * nextPageLimit;
+
+	const { data, total } = await getTopSales({ skip, limit });
+
+	res.json({
+		status: 200,
+		message: "Successfully fetched top-selling fillers!",
+		data,
+		total,
 	});
 };
 

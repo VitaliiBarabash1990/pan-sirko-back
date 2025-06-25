@@ -18,6 +18,7 @@ export const createFillerSchema = Joi.object({
 	benefits_text: Joi.array().items(Joi.string()).required(),
 	Regulations_title: Joi.string().required(),
 	Regulations_text: Joi.array().items(Joi.string()).required(),
+	sales_report: Joi.number().positive().required(),
 	brand: Joi.string().required(),
 	view: Joi.string().required(),
 	wage: Joi.number().positive().required(),

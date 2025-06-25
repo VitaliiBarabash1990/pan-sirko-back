@@ -5,6 +5,7 @@ import {
 	deleteFillerController,
 	getFillerByIdController,
 	getFillersController,
+	getTopSalesController,
 	patchFillerController,
 	upsertFillerController,
 } from "../controllers/fillers.js";
@@ -22,6 +23,8 @@ const router = express.Router();
 const jsonParser = express.json();
 
 router.get("/", ctrlWrapper(getFillersController));
+
+router.get("/top-sales", ctrlWrapper(getTopSalesController));
 
 router.get("/:fillerId", isValidId, ctrlWrapper(getFillerByIdController));
 

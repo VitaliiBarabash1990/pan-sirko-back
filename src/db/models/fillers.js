@@ -18,6 +18,7 @@ const fillersSchema = new Schema(
 		benefits_text: { type: [String], required: false },
 		Regulations_title: { type: String, required: false },
 		Regulations_text: { type: [String], required: false },
+		sales_report: { type: Number, default: 0, required: false },
 		brand: { type: String, required: false },
 		view: { type: String, required: false },
 		wage: { type: Number, required: false },
