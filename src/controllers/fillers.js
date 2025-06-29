@@ -25,16 +25,56 @@ import { env } from "../utils/env.js";
 // 	});
 // };
 
-export const getFillersController = async (req, res) => {
-	const { type = "fillers", page = 1 } = req.query;
+// export const getFillersController = async (req, res) => {
+// 	const { type = "fillers", page = 1 } = req.query;
 
-	const { fillers, total } = await getFilteredFillers(type, parseInt(page, 10));
+// 	const { fillers, total } = await getFilteredFillers(type, parseInt(page, 10));
+
+// 	res.json({
+// 		status: 200,
+// 		message: "Successfully found filtered fillers!",
+// 		data: fillers,
+// 		total,
+// 	});
+// };
+
+export const getFillersController = async (req, res) => {
+	console.log("Запит", req.query);
+	const {
+		type_goods = "fillers",
+		page = 1,
+		type,
+		wage,
+		features,
+		minPrice,
+		maxPrice,
+		sort,
+	} = req.query;
+
+	const { fillers, total, stats } = await getFilteredFillers(
+		type_goods,
+		parseInt(page, 10),
+		{
+			type,
+			wage,
+			features,
+			minPrice,
+			maxPrice,
+			sort,
+		}
+	);
 
 	res.json({
 		status: 200,
-		message: "Successfully found filtered fillers!",
+		message: "Successfully fetched fillers!",
 		data: fillers,
 		total,
+		filters: {
+			type: stats.type.map((el) => ({ name: el._id, count: el.count })),
+			wage: stats.wage.map((el) => ({ name: el._id, count: el.count })),
+			features: stats.features.map((el) => ({ name: el._id, count: el.count })),
+			priceRange: stats.priceRange[0] || { min: 0, max: 0 },
+		},
 	});
 };
 
@@ -90,6 +130,8 @@ export const createFillerController = async (req, res) => {
 		brand: req.body.brand,
 		view: req.body.view,
 		wage: req.body.wage,
+		type: req.body.type,
+		features: req.body.features,
 		volume: req.body.volume,
 		country: req.body.country,
 

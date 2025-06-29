@@ -1,6 +1,11 @@
 import Joi from "joi";
 
 const allowedTypes = ["toys", "houses", "fillers"];
+const allowedTypesForType = [
+	"Бентонітовий",
+	"Соєво-кукурудзяний",
+	"Кукурудзяний",
+];
 
 // Schema for creating a filler
 export const createFillerSchema = Joi.object({
@@ -22,6 +27,14 @@ export const createFillerSchema = Joi.object({
 	brand: Joi.string().required(),
 	view: Joi.string().required(),
 	wage: Joi.number().positive().required(),
+	type: Joi.string()
+		.valid(...allowedTypesForType)
+		.default("Бентонітовий")
+		.optional(),
+	features: Joi.string()
+		.valid("З ароматом", "Без аромату")
+		.default("З ароматом")
+		.optional(),
 	volume: Joi.number().positive().required(),
 	country: Joi.string().required(),
 	qty: Joi.string().optional(),

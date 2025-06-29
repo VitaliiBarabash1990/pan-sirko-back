@@ -1,6 +1,11 @@
 import { model, Schema } from "mongoose";
 
 const allowedTypes = ["toys", "houses", "fillers"];
+const allowedTypesForType = [
+	"Бентонітовий",
+	"Соєво-кукурудзяний",
+	"Кукурудзяний",
+];
 
 const fillersSchema = new Schema(
 	{
@@ -22,10 +27,20 @@ const fillersSchema = new Schema(
 		brand: { type: String, required: false },
 		view: { type: String, required: false },
 		wage: { type: Number, required: false },
+		type: { type: String, enum: allowedTypesForType, default: "Бентонітовий" },
+		features: {
+			type: String,
+			enum: ["З ароматом", "Без аромату"],
+			default: "З ароматом",
+		},
 		volume: { type: Number, required: false },
 		country: { type: String, required: false },
 		qty: { type: String, required: false },
-		type_goods: { type: String, enum: allowedTypes, default: "fillers" },
+		type_goods: {
+			type: String,
+			enum: allowedTypes,
+			default: "fillers",
+		},
 		isSale: { type: Boolean, required: false, default: false },
 		status: { type: Boolean, required: false },
 	},

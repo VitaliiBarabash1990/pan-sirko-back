@@ -18,7 +18,31 @@ import { env } from "../utils/env.js";
 //   return contact;
 // };
 
-export const getFilteredFillers = async (type = "fillers", page = 1) => {
+// export const getFilteredFillers = async (type = "fillers", page = 1) => {
+// 	const firstPageLimit = 6;
+// 	const nextPageLimit = 2;
+
+// 	const isFirstPage = page === 1;
+// 	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
+// 	const skip = isFirstPage ? 0 : firstPageLimit + (page - 2) * nextPageLimit;
+
+// 	const query = { type_goods: type };
+
+// 	// const fillers = await FillersCollection.find(query).skip(skip).limit(limit);
+
+// 	const [fillers, total] = await Promise.all([
+// 		FillersCollection.find(query).skip(skip).limit(limit),
+// 		FillersCollection.countDocuments(query),
+// 	]);
+
+// 	return { fillers, total };
+// };
+
+export const getFilteredFillers = async (
+	type_goods = "fillers",
+	page = 1,
+	queryParams = {}
+) => {
 	const firstPageLimit = 6;
 	const nextPageLimit = 2;
 
@@ -26,16 +50,89 @@ export const getFilteredFillers = async (type = "fillers", page = 1) => {
 	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
 	const skip = isFirstPage ? 0 : firstPageLimit + (page - 2) * nextPageLimit;
 
-	const query = { type_goods: type };
+	// Базовий фільтр
+	const filter = { type_goods };
 
-	// const fillers = await FillersCollection.find(query).skip(skip).limit(limit);
+	// Динамічна фільтрація
+	if (queryParams.type) {
+		filter.type = {
+			$in: Array.isArray(queryParams.type)
+				? queryParams.type
+				: [queryParams.type],
+		};
+	}
 
-	const [fillers, total] = await Promise.all([
-		FillersCollection.find(query).skip(skip).limit(limit),
-		FillersCollection.countDocuments(query),
+	if (queryParams.wage) {
+		const wageArr = Array.isArray(queryParams.wage)
+			? queryParams.wage
+			: [queryParams.wage];
+		filter.wage = { $in: wageArr.map(Number) };
+	}
+
+	if (queryParams.features) {
+		filter.features = {
+			$in: Array.isArray(queryParams.features)
+				? queryParams.features
+				: [queryParams.features],
+		};
+	}
+
+	if (queryParams.minPrice || queryParams.maxPrice) {
+		filter.price = {};
+		if (queryParams.minPrice) filter.price.$gte = Number(queryParams.minPrice);
+		if (queryParams.maxPrice) filter.price.$lte = Number(queryParams.maxPrice);
+	}
+
+	// Обробка сортування
+	let sortOption = {};
+
+	switch (queryParams.sort) {
+		case "newest":
+			sortOption = { createdAt: -1 };
+			break;
+		case "expensive":
+			sortOption = { price: -1 };
+			break;
+		case "cheap":
+			sortOption = { price: 1 };
+			break;
+		case "popular":
+			sortOption = { sales_report: -1 };
+			break;
+		default:
+			sortOption = { createdAt: -1 };
+			break;
+	}
+
+	const [fillers, total, stats] = await Promise.all([
+		FillersCollection.find(filter).sort(sortOption).skip(skip).limit(limit),
+		FillersCollection.countDocuments(filter),
+		FillersCollection.aggregate([
+			{ $match: { type_goods } },
+			{
+				$facet: {
+					type: [{ $group: { _id: "$type", count: { $sum: 1 } } }],
+					wage: [{ $group: { _id: "$wage", count: { $sum: 1 } } }],
+					features: [{ $group: { _id: "$features", count: { $sum: 1 } } }],
+					priceRange: [
+						{
+							$group: {
+								_id: null,
+								min: { $min: "$price" },
+								max: { $max: "$price" },
+							},
+						},
+					],
+				},
+			},
+		]),
 	]);
 
-	return { fillers, total };
+	return {
+		fillers,
+		total,
+		stats: stats[0] || { type: [], wage: [], features: [], priceRange: [] },
+	};
 };
 
 export const getFillerById = async (fillerId, userId) => {
