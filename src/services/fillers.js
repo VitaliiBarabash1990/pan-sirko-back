@@ -7,6 +7,8 @@ import path from "node:path";
 import { SMTP, TEMPLATES_DIR } from "../constants/index.js";
 import fs from "node:fs/promises";
 import { env } from "../utils/env.js";
+import { ReviewsCollection } from "../db/models/reviews.js";
+import { reply } from "../db/models/reply.js";
 
 // export const getAllFillers = async () => {
 // 	const fillers = await FillersCollection.find();
@@ -133,6 +135,101 @@ export const getFilteredFillers = async (
 		total,
 		stats: stats[0] || { type: [], wage: [], features: [], priceRange: [] },
 	};
+};
+
+export const createReview = async (data) => {
+	return await ReviewsCollection.create(data);
+};
+
+export const getReviewsWithReplies = async (id_owner) => {
+	const reviews = await ReviewsCollection.find({ id_owner }).lean();
+
+	if (!reviews.length) return [];
+
+	const reviewIds = reviews.map((r) => r._id);
+	const allReplies = await reply.find({ commentId: { $in: reviewIds } }).lean();
+
+	const reviewsWithReplies = reviews.map((review) => {
+		// Відфільтровуємо репліки, що належать цьому коментарю
+		const repliesForReview = allReplies.filter(
+			(r) => r.commentId.toString() === review._id.toString()
+		);
+
+		// Будуємо дерево для цих реплік
+		const repliesTree = buildRepliesTree(repliesForReview, null);
+
+		return {
+			...review,
+			replies: repliesTree,
+		};
+	});
+
+	return reviewsWithReplies;
+};
+
+// рекурсивна функція, що будує дерево реплік
+const buildRepliesTree = (allReplies, parentId = null) => {
+	return allReplies
+		.filter((reply) => {
+			if (parentId === null) {
+				return reply.parentReplyId === null;
+			}
+			return reply.parentReplyId?.toString() === parentId.toString();
+		})
+		.map((reply) => ({
+			...reply, // просто spread без toObject()
+			replies: buildRepliesTree(allReplies, reply._id),
+		}));
+};
+
+export const createReply = async ({
+	reviewId,
+	parentReplyId = null,
+	author,
+	comment,
+	date = new Date(),
+}) => {
+	return await reply.create({
+		commentId: reviewId,
+		parentReplyId,
+		author,
+		comment,
+		date,
+	});
+};
+
+export const deleteReview = async (reviewId) => {
+	// 1. Видаляємо всі репліки, які належать цьому рев’ю
+	await Reply.deleteMany({ commentId: reviewId });
+
+	// 2. Видаляємо сам рев’ю
+	const deletedReview = await ReviewsCollection.findByIdAndDelete(reviewId);
+
+	return deletedReview;
+};
+
+export const deleteReply = async (replyId, reviewId) => {
+	// Рекурсивна функція для видалення всіх дітей
+	const deleteChildren = async (parentId) => {
+		const children = await reply.find({ parentReplyId: parentId });
+		for (const child of children) {
+			await deleteChildren(child._id);
+			await reply.findByIdAndDelete(child._id);
+		}
+	};
+
+	// Знаходимо і видаляємо основну репліку
+	const deletedReply = await reply.findOneAndDelete({
+		_id: replyId,
+		commentId: reviewId,
+	});
+
+	if (!deletedReply) return null;
+
+	// Видаляємо всі вкладені рекурсивно
+	await deleteChildren(replyId);
+
+	return deletedReply;
 };
 
 export const getFillerById = async (fillerId, userId) => {

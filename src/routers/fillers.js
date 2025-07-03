@@ -2,9 +2,14 @@
 import express from "express";
 import {
 	createFillerController,
+	createReplyController,
+	createReviewController,
 	deleteFillerController,
+	deleteReplyByIdController,
+	deleteReviewController,
 	getFillerByIdController,
 	getFillersController,
+	getReviewsByOwnerController,
 	getTopSalesController,
 	patchFillerController,
 	upsertFillerController,
@@ -23,6 +28,19 @@ const router = express.Router();
 const jsonParser = express.json();
 
 router.get("/", ctrlWrapper(getFillersController));
+
+router.post("/reviews", ctrlWrapper(createReviewController));
+
+router.get("/reviews/:id_owner", ctrlWrapper(getReviewsByOwnerController));
+
+router.post("/reviews/:reviewId/replies", ctrlWrapper(createReplyController));
+
+router.delete("/reviews/:reviewId", ctrlWrapper(deleteReviewController));
+
+router.delete(
+	"/reviews/:reviewId/replies/:replyId",
+	ctrlWrapper(deleteReplyByIdController)
+);
 
 router.get("/top-sales", ctrlWrapper(getTopSalesController));
 

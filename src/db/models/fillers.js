@@ -5,6 +5,9 @@ const allowedTypesForType = [
 	"Бентонітовий",
 	"Соєво-кукурудзяний",
 	"Кукурудзяний",
+	"Будиночок",
+	"Лежак",
+	"Матрац",
 ];
 
 const fillersSchema = new Schema(

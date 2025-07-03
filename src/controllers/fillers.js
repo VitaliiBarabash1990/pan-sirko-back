@@ -1,10 +1,15 @@
 import createHttpError from "http-errors";
 import {
 	createFiller,
+	createReply,
+	createReview,
 	deleteFiller,
+	deleteReply,
+	deleteReview,
 	// getAllFillers,
 	getFillerById,
 	getFilteredFillers,
+	getReviewsWithReplies,
 	getTopSales,
 	requestSendEmail,
 	updateFiller,
@@ -14,6 +19,7 @@ import { requestResetToken } from "../services/auth.js";
 import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { env } from "../utils/env.js";
+import { UsersCollection } from "../db/models/user.js";
 
 // export const getFillersController = async (req, res) => {
 // 	const fillers = await getAllFillers();
@@ -75,6 +81,146 @@ export const getFillersController = async (req, res) => {
 			features: stats.features.map((el) => ({ name: el._id, count: el.count })),
 			priceRange: stats.priceRange[0] || { min: 0, max: 0 },
 		},
+	});
+};
+
+export const createReviewController = async (req, res) => {
+	const { email, ...reviewData } = req.body;
+
+	// Перевіряємо, чи передано email
+	if (!email) {
+		throw createHttpError(400, "Email is required");
+	}
+
+	// Шукаємо користувача за email
+	const user = await UsersCollection.findOne({ email });
+	if (!user) {
+		throw createHttpError(404, "User with this email does not exist");
+	}
+
+	// Якщо користувач існує — створюємо відгук
+	const newReview = await createReview(reviewData);
+
+	if (!newReview) {
+		throw createHttpError(400, "Failed to create review");
+	}
+
+	res.status(201).json({
+		status: 201,
+		message: "Review successfully created",
+		data: newReview,
+	});
+};
+
+// export const createReviewController = async (req, res) => {
+// 	const newReview = await createReview(req.body);
+
+// 	if (!newReview) {
+// 		throw createHttpError(400, "Failed to create review");
+// 	}
+
+// 	res.status(201).json({
+// 		status: 201,
+// 		message: "Review successfully created",
+// 		data: newReview,
+// 	});
+// };
+
+export const getReviewsByOwnerController = async (req, res) => {
+	const { id_owner } = req.params;
+
+	const reviews = await getReviewsWithReplies(id_owner);
+
+	res.status(200).json({
+		status: 200,
+		data: reviews,
+	});
+};
+
+export const createReplyController = async (req, res) => {
+	const { reviewId } = req.params;
+	const { parentReplyId, author, comment, email } = req.body;
+
+	if (!email) {
+		throw createHttpError(400, "Email is required");
+	}
+
+	// Перевірка існування користувача
+	const user = await UsersCollection.findOne({ email });
+	if (!user) {
+		throw createHttpError(404, "User with this email does not exist");
+	}
+
+	// Створення відповіді
+	const newReply = await createReply({
+		reviewId,
+		parentReplyId,
+		author,
+		comment,
+	});
+
+	if (!newReply) {
+		throw createHttpError(400, "Failed to create reply");
+	}
+
+	res.status(201).json({
+		status: 201,
+		message: "Reply successfully created",
+		data: newReply,
+	});
+};
+
+// export const createReplyController = async (req, res) => {
+// 	const { reviewId } = req.params;
+// 	const { parentReplyId, author, comment } = req.body;
+
+// 	const newReply = await createReply({
+// 		reviewId,
+// 		parentReplyId,
+// 		author,
+// 		comment,
+// 	});
+
+// 	if (!newReply) {
+// 		throw createHttpError(400, "Failed to create reply");
+// 	}
+
+// 	res.status(201).json({
+// 		status: 201,
+// 		message: "Reply successfully created",
+// 		data: newReply,
+// 	});
+// };
+
+export const deleteReviewController = async (req, res) => {
+	const { reviewId } = req.params;
+
+	const deletedReview = await deleteReview(reviewId);
+
+	if (!deletedReview) {
+		throw createHttpError(404, "Review not found or already deleted");
+	}
+
+	res.status(200).json({
+		status: 200,
+		message: `Review with id ${reviewId} successfully deleted`,
+		data: deletedReview,
+	});
+};
+
+export const deleteReplyByIdController = async (req, res) => {
+	const { reviewId, replyId } = req.params;
+
+	const deletedReply = await deleteReply(replyId, reviewId);
+
+	if (!deletedReply) {
+		throw createHttpError(404, "Reply not found or already deleted");
+	}
+
+	res.status(200).json({
+		status: 200,
+		message: `Reply with id ${replyId} successfully deleted`,
+		data: deletedReply,
 	});
 };
 

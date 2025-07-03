@@ -87,6 +87,7 @@ export const registerUser = async (payload) => {
 
 		const result = {
 			name: createdUser.name,
+			second_name: createdUser.name,
 			phone: createdUser.phone,
 			email: createdUser.email,
 			accessToken: session.accessToken,
@@ -128,6 +129,7 @@ export const loginUser = async (payload) => {
 
 	const result = {
 		name: user.name,
+		second_name: user.second_name,
 		phone: user.phone,
 		email: user.email,
 		accessToken: createdSession.accessToken,
