@@ -132,6 +132,7 @@ export const loginUser = async (payload) => {
 		second_name: user.second_name,
 		phone: user.phone,
 		email: user.email,
+		avatar: user.avatar,
 		accessToken: createdSession.accessToken,
 		userId: createdSession.userId,
 	};
@@ -271,4 +272,16 @@ export const resetPassword = async (payload) => {
 		},
 		{ password: encryptedPassword }
 	);
+};
+
+export const updateUser = async (userId, payload) => {
+	const updatedUser = await UsersCollection.findOneAndUpdate(
+		{ _id: userId },
+		payload,
+		{
+			new: true,
+		}
+	);
+
+	return updatedUser;
 };

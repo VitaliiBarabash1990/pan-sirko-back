@@ -4,8 +4,12 @@ import {
 	refreshUsersSession,
 	registerUser,
 	resetPassword,
+	updateUser,
 } from "../services/auth.js";
 import { ONE_DAY } from "../constants/index.js";
+import { env } from "../utils/env.js";
+import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
+import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 
 export const registerUserController = async (req, res) => {
 	const user = await registerUser(req.body);
@@ -81,5 +85,32 @@ export const resetPasswordController = async (req, res) => {
 		message: "Password was successfully reset!",
 		status: 200,
 		data: {},
+	});
+};
+
+export const updateUserController = async (req, res) => {
+	const user = req.user;
+	const userId = user.id;
+	const avatar = req.file;
+
+	let avatarUrl;
+
+	if (avatar) {
+		if (env("ENABLE_CLOUDINARY") === "true") {
+			avatarUrl = await saveFileToCloudinary(avatar);
+		} else {
+			avatarUrl = await saveFileToUploadDir(avatar);
+		}
+	}
+
+	const updatedUser = await updateUser(userId, {
+		...req.body,
+		avatar: avatarUrl,
+	});
+
+	res.status(200).json({
+		status: 200,
+		message: "Successfully updated a user!",
+		data: updatedUser,
 	});
 };

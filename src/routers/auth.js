@@ -5,6 +5,7 @@ import {
 	registerUserSchema,
 	requestResetEmailSchema,
 	resetPasswordSchema,
+	updateUserSchema,
 } from "../validation/auth.js";
 import {
 	loginUserController,
@@ -12,10 +13,13 @@ import {
 	refreshUserSessionController,
 	registerUserController,
 	resetPasswordController,
+	updateUserController,
 } from "../controllers/auth.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { requestResetEmailController } from "../controllers/contacts.js";
 import { sendEmailController } from "../controllers/fillers.js";
+import { authenticate } from "../middlewares/authenticate.js";
+import { upload } from "../middlewares/multer.js";
 
 const router = express.Router();
 const jsonParser = express.json();
@@ -36,6 +40,14 @@ router.post(
 router.post("/logout", ctrlWrapper(logoutUserController));
 
 router.post("/refresh", ctrlWrapper(refreshUserSessionController));
+
+router.patch(
+	"/update",
+	authenticate,
+	upload.single("avatar"),
+	validateBody(updateUserSchema),
+	ctrlWrapper(updateUserController)
+);
 
 router.post("/send-order", jsonParser, ctrlWrapper(sendEmailController));
 

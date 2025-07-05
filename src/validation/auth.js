@@ -26,3 +26,10 @@ export const resetPasswordSchema = Joi.object({
 	password: Joi.string().required(),
 	token: Joi.string().required(),
 });
+
+export const updateUserSchema = Joi.object({
+	name: Joi.string(),
+	second_name: Joi.string(),
+	phone: Joi.number(),
+	email: Joi.string().email(),
+});
