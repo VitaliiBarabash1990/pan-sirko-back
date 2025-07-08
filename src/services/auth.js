@@ -72,8 +72,6 @@ export const registerUser = async (payload) => {
 			password: encryptedPassword,
 		});
 
-		console.log("User created:", createdUser);
-
 		const accessToken = randomBytes(30).toString("base64");
 		const refreshToken = randomBytes(30).toString("base64");
 
@@ -87,14 +85,16 @@ export const registerUser = async (payload) => {
 
 		const result = {
 			name: createdUser.name,
-			second_name: createdUser.name,
+			second_name: createdUser.second_name,
 			phone: createdUser.phone,
 			email: createdUser.email,
+			avatar: createdUser.avatar,
 			accessToken: session.accessToken,
 			userId: session.userId,
 		};
 
-		return result;
+		// return result;
+		return { user: result, session };
 	} catch (err) {
 		console.error("Error in registerUser:", err);
 		throw err;
@@ -134,7 +134,10 @@ export const loginUser = async (payload) => {
 		email: user.email,
 		avatar: user.avatar,
 		accessToken: createdSession.accessToken,
+		refreshToken: createdSession.refreshToken, // ← додай
+		sessionId: createdSession._id, // ← додай
 		userId: createdSession.userId,
+		_id: createdSession._id,
 	};
 	return result;
 };
@@ -234,7 +237,7 @@ export const requestResetToken = async (email) => {
 	const template = handlebars.compile(templateSource);
 	const html = template({
 		name: user.name,
-		link: `${env("APP_DOMAIN")}/reset-pasword?token=${resetToken}`,
+		link: `${env("APP_DOMAIN")}?token=${resetToken}`,
 	});
 
 	await sendEmail({

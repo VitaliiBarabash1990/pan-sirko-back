@@ -2,7 +2,7 @@ import Joi from "joi";
 
 export const registerUserSchema = Joi.object({
 	name: Joi.string().min(3).max(30).required(),
-	second_name: Joi.string().min(3).max(30).required(false),
+	second_name: Joi.string().min(3).max(30).optional(),
 	phone: Joi.string()
 		.pattern(/^\+380\d{9}$/)
 		.required()

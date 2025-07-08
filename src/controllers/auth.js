@@ -11,8 +11,20 @@ import { env } from "../utils/env.js";
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 
+// export const registerUserController = async (req, res) => {
+// 	const user = await registerUser(req.body);
+
+// 	res.status(201).json({
+// 		status: 201,
+// 		message: "Successfully registered a user!",
+// 		data: user,
+// 	});
+// };
+
 export const registerUserController = async (req, res) => {
-	const user = await registerUser(req.body);
+	const { user, session } = await registerUser(req.body);
+
+	setupSession(res, session);
 
 	res.status(201).json({
 		status: 201,
@@ -26,10 +38,18 @@ export const loginUserController = async (req, res) => {
 	res.cookie("refreshToken", session.refreshToken, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 	res.cookie("sessionId", session._id, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 
 	res.json({
@@ -55,10 +75,18 @@ const setupSession = (res, session) => {
 	res.cookie("refreshToken", session.refreshToken, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "lax",
+		// secure: false,
 	});
 	res.cookie("sessionId", session._id, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "lax",
+		// secure: false,
 	});
 };
 
@@ -69,6 +97,8 @@ export const refreshUserSessionController = async (req, res) => {
 	});
 
 	setupSession(res, session);
+	console.log("Cookies:", req.cookies);
+	console.log("sessionId:", req.cookies?.sessionId);
 
 	res.json({
 		status: 200,

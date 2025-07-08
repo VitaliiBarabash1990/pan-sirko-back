@@ -112,20 +112,6 @@ export const createReviewController = async (req, res) => {
 	});
 };
 
-// export const createReviewController = async (req, res) => {
-// 	const newReview = await createReview(req.body);
-
-// 	if (!newReview) {
-// 		throw createHttpError(400, "Failed to create review");
-// 	}
-
-// 	res.status(201).json({
-// 		status: 201,
-// 		message: "Review successfully created",
-// 		data: newReview,
-// 	});
-// };
-
 export const getReviewsByOwnerController = async (req, res) => {
 	const { id_owner } = req.params;
 
@@ -170,28 +156,6 @@ export const createReplyController = async (req, res) => {
 	});
 };
 
-// export const createReplyController = async (req, res) => {
-// 	const { reviewId } = req.params;
-// 	const { parentReplyId, author, comment } = req.body;
-
-// 	const newReply = await createReply({
-// 		reviewId,
-// 		parentReplyId,
-// 		author,
-// 		comment,
-// 	});
-
-// 	if (!newReply) {
-// 		throw createHttpError(400, "Failed to create reply");
-// 	}
-
-// 	res.status(201).json({
-// 		status: 201,
-// 		message: "Reply successfully created",
-// 		data: newReply,
-// 	});
-// };
-
 export const deleteReviewController = async (req, res) => {
 	const { reviewId } = req.params;
 
@@ -231,12 +195,6 @@ export const getFillerByIdController = async (req, res) => {
 	if (!filler) {
 		throw createHttpError(404, "Filler not found");
 	}
-
-	// //Якщо використовуємо цю умову то в services використовуємо 56 рядок, а якщо використовуємо getContactById 61 рядок то цю умову не використовуємо
-	// if (contact.userId.toString() !== req.user.id.toString()) {
-	//   // throw new createHttpError.Forbidden('Contacts forbidden!')//Академічно потрібно цей рядок але використовують
-	//   throw new createHttpError.NotFound('Contact not found'); //Щоб заплутати небажаного користувача
-	// }
 
 	res.json({
 		status: 200,
