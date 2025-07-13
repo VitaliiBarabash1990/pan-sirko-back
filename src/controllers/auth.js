@@ -5,21 +5,13 @@ import {
 	registerUser,
 	resetPassword,
 	updateUser,
+	loginOrRegister,
 } from "../services/auth.js";
+import { generateOAuthURL, validateCode } from "../utils/googleOAuth2.js";
 import { ONE_DAY } from "../constants/index.js";
 import { env } from "../utils/env.js";
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
-
-// export const registerUserController = async (req, res) => {
-// 	const user = await registerUser(req.body);
-
-// 	res.status(201).json({
-// 		status: 201,
-// 		message: "Successfully registered a user!",
-// 		data: user,
-// 	});
-// };
 
 export const registerUserController = async (req, res) => {
 	const { user, session } = await registerUser(req.body);
@@ -38,18 +30,18 @@ export const loginUserController = async (req, res) => {
 	res.cookie("refreshToken", session.refreshToken, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
 	res.cookie("sessionId", session._id, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
 
 	res.json({
@@ -75,18 +67,18 @@ const setupSession = (res, session) => {
 	res.cookie("refreshToken", session.refreshToken, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "lax",
+		secure: false,
 	});
 	res.cookie("sessionId", session._id, {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "lax",
+		secure: false,
 	});
 };
 
@@ -97,8 +89,8 @@ export const refreshUserSessionController = async (req, res) => {
 	});
 
 	setupSession(res, session);
-	console.log("Cookies:", req.cookies);
-	console.log("sessionId:", req.cookies?.sessionId);
+	// console.log("Cookies:", req.cookies);
+	// console.log("sessionId:", req.cookies?.sessionId);
 
 	res.json({
 		status: 200,
@@ -144,3 +136,37 @@ export const updateUserController = async (req, res) => {
 		data: updatedUser,
 	});
 };
+
+export async function getOAuthURLController(req, res) {
+	const url = generateOAuthURL();
+
+	res.send({
+		status: 200,
+		message: "Successfully get Google OAuth URL",
+		data: url,
+	});
+}
+
+export async function confirmOAuthController(req, res) {
+	const { code } = req.body;
+	console.log("OAuth code:", code);
+
+	console.log(code);
+	const ticket = await validateCode(code);
+	const session = await loginOrRegister(ticket.payload);
+
+	setupSession(res, session);
+
+	res.send({
+		status: 200,
+		message: "Login with Google seccessfuly",
+		data: {
+			name: session.name,
+			second_name: session.second_name,
+			phone: session.phone,
+			email: session.email,
+			avatar: session.avatar,
+			accessToken: session.accessToken,
+		},
+	});
+}

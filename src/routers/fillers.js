@@ -61,7 +61,7 @@ router.post(
 // 	ctrlWrapper(createContactController)
 // );
 
-router.delete("/:fillerId", isValidId, ctrlWrapper(deleteFillerController));
+router.delete("/:id", isValidId, ctrlWrapper(deleteFillerController));
 
 router.put(
 	"/:fillerId",

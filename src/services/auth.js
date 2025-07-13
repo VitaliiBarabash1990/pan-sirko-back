@@ -18,6 +18,7 @@ import { env } from "../utils/env.js";
 import handlebars from "handlebars";
 import path from "node:path";
 import fs from "node:fs/promises";
+import mongoose from "mongoose";
 
 // export const registerUser = async (payload) => {
 //   const user = await UsersCollection.findOne({ email: payload.email });
@@ -288,3 +289,81 @@ export const updateUser = async (userId, payload) => {
 
 	return updatedUser;
 };
+
+export async function loginOrRegister(payload) {
+	const { email, name, picture } = payload;
+
+	let user = await UsersCollection.findOne({ email });
+
+	// Якщо користувача немає — створити
+	if (!user) {
+		const password = await bcrypt.hash(randomBytes(30).toString("base64"), 10);
+		user = await UsersCollection.create({
+			name,
+			email,
+			avatar: picture,
+			password,
+		});
+	}
+
+	// Видалити всі старі сесії цього користувача
+	await SessionsCollection.deleteMany({ userId: user._id });
+
+	// Створити токени
+	const accessToken = randomBytes(30).toString("base64");
+	const refreshToken = randomBytes(30).toString("base64");
+
+	// Створити нову сесію
+	const createdSession = await SessionsCollection.create({
+		userId: user._id,
+		accessToken,
+		refreshToken,
+		accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+		refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+	});
+
+	// Повернути результат
+	return {
+		name: user.name,
+		second_name: user.second_name || "",
+		phone: user.phone || "",
+		email: user.email,
+		avatar: user.avatar,
+		accessToken: createdSession.accessToken,
+		refreshToken: createdSession.refreshToken,
+		sessionId: createdSession._id,
+		userId: user._id,
+		_id: createdSession._id,
+	};
+}
+
+// export async function loginOrRegister(payload) {
+// 	const user = await UsersCollection.findOne({ email: payload.email });
+
+// 	if (user === null) {
+// 		const password = await bcrypt.hash(randomBytes(30).toString("base64"), 10);
+// 		const createdUser = await UsersCollection.create({
+// 			name: payload.name,
+// 			email: payload.email,
+// 			avatar: payload.picture,
+// 			password,
+// 		});
+
+// 		return SessionsCollection.create({
+// 			userId: createdUser._id,
+// 			accessToken: randomBytes(30).toString("base64"),
+// 			refreshToken: randomBytes(30).toString("base64"),
+// 			accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+// 			refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+// 		});
+// 	}
+// 	await SessionsCollection.deleteOne({ userId: user._id });
+
+// 	return SessionsCollection.create({
+// 		userId: user._id,
+// 		accessToken: randomBytes(30).toString("base64"),
+// 		refreshToken: randomBytes(30).toString("base64"),
+// 		accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+// 		refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+// 	});
+// }

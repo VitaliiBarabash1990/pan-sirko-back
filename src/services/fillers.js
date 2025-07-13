@@ -40,55 +40,153 @@ import { reply } from "../db/models/reply.js";
 // 	return { fillers, total };
 // };
 
+// export const getFilteredFillers = async (
+// 	type_goods = "",
+// 	page = 1,
+// 	queryParams = {}
+// ) => {
+// 	const firstPageLimit = 6;
+// 	const nextPageLimit = 2;
+
+// 	const isFirstPage = page === 1;
+// 	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
+// 	const skip = isFirstPage ? 0 : firstPageLimit + (page - 2) * nextPageLimit;
+
+// 	// Базовий фільтр
+// 	// const filter = { type_goods };
+
+// 	const filter = {};
+// 	if (type_goods) {
+// 		filter.type_goods = type_goods;
+// 	}
+
+// 	// Динамічна фільтрація
+// 	if (queryParams.type) {
+// 		filter.type = {
+// 			$in: Array.isArray(queryParams.type)
+// 				? queryParams.type
+// 				: [queryParams.type],
+// 		};
+// 	}
+
+// 	if (queryParams.wage) {
+// 		const wageArr = Array.isArray(queryParams.wage)
+// 			? queryParams.wage
+// 			: [queryParams.wage];
+// 		filter.wage = { $in: wageArr.map(Number) };
+// 	}
+
+// 	if (queryParams.features) {
+// 		filter.features = {
+// 			$in: Array.isArray(queryParams.features)
+// 				? queryParams.features
+// 				: [queryParams.features],
+// 		};
+// 	}
+
+// 	if (queryParams.minPrice || queryParams.maxPrice) {
+// 		filter.price = {};
+// 		if (queryParams.minPrice) filter.price.$gte = Number(queryParams.minPrice);
+// 		if (queryParams.maxPrice) filter.price.$lte = Number(queryParams.maxPrice);
+// 	}
+
+// 	// Обробка сортування
+// 	let sortOption = {};
+
+// 	switch (queryParams.sort) {
+// 		case "newest":
+// 			sortOption = { createdAt: -1 };
+// 			break;
+// 		case "expensive":
+// 			sortOption = { price: -1 };
+// 			break;
+// 		case "cheap":
+// 			sortOption = { price: 1 };
+// 			break;
+// 		case "popular":
+// 			sortOption = { sales_report: -1 };
+// 			break;
+// 		default:
+// 			sortOption = { createdAt: -1 };
+// 			break;
+// 	}
+
+// 	const [fillers, total, stats] = await Promise.all([
+// 		FillersCollection.find(filter).sort(sortOption).skip(skip).limit(limit),
+// 		FillersCollection.countDocuments(filter),
+// 		FillersCollection.aggregate([
+// 			// { $match: { type_goods } },
+// 			// { $match: type_goods ? { type_goods } : {} },
+// 			{ $match: filter },
+// 			{
+// 				$facet: {
+// 					type: [{ $group: { _id: "$type", count: { $sum: 1 } } }],
+// 					wage: [{ $group: { _id: "$wage", count: { $sum: 1 } } }],
+// 					features: [{ $group: { _id: "$features", count: { $sum: 1 } } }],
+// 					priceRange: [
+// 						{
+// 							$group: {
+// 								_id: null,
+// 								min: { $min: "$price" },
+// 								max: { $max: "$price" },
+// 							},
+// 						},
+// 					],
+// 				},
+// 			},
+// 		]),
+// 	]);
+
+// 	return {
+// 		fillers,
+// 		total,
+// 		stats: stats[0] || { type: [], wage: [], features: [], priceRange: [] },
+// 	};
+// };
+
 export const getFilteredFillers = async (
-	type_goods = "fillers",
+	type_goods = "",
 	page = 1,
 	queryParams = {}
 ) => {
-	const firstPageLimit = 6;
-	const nextPageLimit = 2;
+	const { firstPageLimit = 6, nextPageLimit = 2, ...filters } = queryParams;
 
 	const isFirstPage = page === 1;
 	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
 	const skip = isFirstPage ? 0 : firstPageLimit + (page - 2) * nextPageLimit;
 
-	// Базовий фільтр
-	const filter = { type_goods };
+	const filter = {};
+	if (type_goods) {
+		filter.type_goods = type_goods;
+	}
 
-	// Динамічна фільтрація
-	if (queryParams.type) {
+	if (filters.type) {
 		filter.type = {
-			$in: Array.isArray(queryParams.type)
-				? queryParams.type
-				: [queryParams.type],
+			$in: Array.isArray(filters.type) ? filters.type : [filters.type],
 		};
 	}
 
-	if (queryParams.wage) {
-		const wageArr = Array.isArray(queryParams.wage)
-			? queryParams.wage
-			: [queryParams.wage];
+	if (filters.wage) {
+		const wageArr = Array.isArray(filters.wage) ? filters.wage : [filters.wage];
 		filter.wage = { $in: wageArr.map(Number) };
 	}
 
-	if (queryParams.features) {
+	if (filters.features) {
 		filter.features = {
-			$in: Array.isArray(queryParams.features)
-				? queryParams.features
-				: [queryParams.features],
+			$in: Array.isArray(filters.features)
+				? filters.features
+				: [filters.features],
 		};
 	}
 
-	if (queryParams.minPrice || queryParams.maxPrice) {
+	if (filters.minPrice || filters.maxPrice) {
 		filter.price = {};
-		if (queryParams.minPrice) filter.price.$gte = Number(queryParams.minPrice);
-		if (queryParams.maxPrice) filter.price.$lte = Number(queryParams.maxPrice);
+		if (filters.minPrice) filter.price.$gte = Number(filters.minPrice);
+		if (filters.maxPrice) filter.price.$lte = Number(filters.maxPrice);
 	}
 
-	// Обробка сортування
 	let sortOption = {};
-
-	switch (queryParams.sort) {
+	switch (filters.sort) {
 		case "newest":
 			sortOption = { createdAt: -1 };
 			break;
@@ -110,7 +208,7 @@ export const getFilteredFillers = async (
 		FillersCollection.find(filter).sort(sortOption).skip(skip).limit(limit),
 		FillersCollection.countDocuments(filter),
 		FillersCollection.aggregate([
-			{ $match: { type_goods } },
+			{ $match: filter },
 			{
 				$facet: {
 					type: [{ $group: { _id: "$type", count: { $sum: 1 } } }],
@@ -232,8 +330,8 @@ export const deleteReply = async (replyId, reviewId) => {
 	return deletedReply;
 };
 
-export const getFillerById = async (fillerId, userId) => {
-	return FillersCollection.findOne({ _id: fillerId, userId });
+export const getFillerById = async (fillerId) => {
+	return FillersCollection.findOne({ _id: fillerId });
 };
 
 export const createFiller = async (payload) => {
@@ -241,10 +339,9 @@ export const createFiller = async (payload) => {
 	return filler;
 };
 
-export const deleteFiller = async (fillerId, userId) => {
+export const deleteFiller = async (id) => {
 	const filler = await FillersCollection.findOneAndDelete({
-		_id: fillerId,
-		userId,
+		_id: id,
 	});
 	return filler;
 };

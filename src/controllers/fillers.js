@@ -47,7 +47,7 @@ import { UsersCollection } from "../db/models/user.js";
 export const getFillersController = async (req, res) => {
 	console.log("Запит", req.query);
 	const {
-		type_goods = "fillers",
+		type_goods,
 		page = 1,
 		type,
 		wage,
@@ -55,6 +55,8 @@ export const getFillersController = async (req, res) => {
 		minPrice,
 		maxPrice,
 		sort,
+		firstPageLimit,
+		nextPageLimit,
 	} = req.query;
 
 	const { fillers, total, stats } = await getFilteredFillers(
@@ -67,6 +69,8 @@ export const getFillersController = async (req, res) => {
 			minPrice,
 			maxPrice,
 			sort,
+			firstPageLimit: Number(firstPageLimit),
+			nextPageLimit: Number(nextPageLimit),
 		}
 	);
 
@@ -189,6 +193,7 @@ export const deleteReplyByIdController = async (req, res) => {
 };
 
 export const getFillerByIdController = async (req, res) => {
+	console.log("REQUESTID", req.body);
 	const { fillerId } = req.params;
 	const filler = await getFillerById(fillerId, req.user.id);
 
@@ -253,9 +258,9 @@ export const createFillerController = async (req, res) => {
 };
 
 export const deleteFillerController = async (req, res, next) => {
-	const { fillerId } = req.params;
+	const { id } = req.params;
 
-	const filler = await deleteFiller(fillerId, req.user.id);
+	const filler = await deleteFiller(id);
 
 	if (!filler) {
 		next(createHttpError(404, `Filler not found`));

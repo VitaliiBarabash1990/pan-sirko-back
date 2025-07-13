@@ -33,3 +33,7 @@ export const updateUserSchema = Joi.object({
 	phone: Joi.number(),
 	email: Joi.string().email(),
 });
+
+export const confirmOAuthSchema = Joi.object({
+	code: Joi.string().required(),
+});
