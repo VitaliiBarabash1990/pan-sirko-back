@@ -35,3 +35,16 @@ export const getArticleById = async (id) => {
 export const createArticle = async (data) => {
 	return await BlogsCollection.create(data);
 };
+
+export const updateBlogById = async (id, updateData) => {
+	return await BlogsCollection.findByIdAndUpdate(id, updateData, {
+		new: true,
+	});
+};
+
+export const deleteArticle = async (id) => {
+	const filler = await BlogsCollection.findOneAndDelete({
+		_id: id,
+	});
+	return filler;
+};

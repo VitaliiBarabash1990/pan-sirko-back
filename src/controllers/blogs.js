@@ -1,8 +1,10 @@
 import createHttpError from "http-errors";
 import {
 	createArticle,
+	deleteArticle,
 	getArticleById,
 	getPaginatedBlogs,
+	updateBlogById,
 } from "../services/blogs.js";
 
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
@@ -61,4 +63,44 @@ export const createArticleController = async (req, res) => {
 		message: "Article successfully created",
 		data: newArticle,
 	});
+};
+
+export const updateBlogController = async (req, res) => {
+	const { id } = req.params;
+	const { question, answer } = req.body;
+	const file = req.file; // якщо використовуєш multer для `multipart/form-data`
+
+	const updateData = {};
+	if (question !== undefined) updateData.question = question;
+	if (answer !== undefined) updateData.answer = answer;
+	if (file) {
+		// Завантаження зображення в Cloudinary
+		const imgUrl = await saveFileToCloudinary(file);
+		updateData.img = imgUrl;
+	}
+
+	const updatedBlog = await updateBlogById(id, updateData);
+
+	if (!updatedBlog) {
+		return res.status(404).json({ status: 404, message: "Blog not found" });
+	}
+
+	res.json({
+		status: 200,
+		message: "Blog updated successfully!",
+		data: updatedBlog,
+	});
+};
+
+export const deleteArticleController = async (req, res, next) => {
+	const { id } = req.params;
+
+	const filler = await deleteArticle(id);
+
+	if (!filler) {
+		next(createHttpError(404, `Filler not found`));
+		return;
+	}
+
+	res.status(204).send();
 };

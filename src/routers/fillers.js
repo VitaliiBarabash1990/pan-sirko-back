@@ -1,7 +1,8 @@
 // import { Router } from 'express';
 import express from "express";
 import {
-	createFillerController,
+	createFillerAdminController,
+	// createFillerController,
 	createReplyController,
 	createReviewController,
 	deleteFillerController,
@@ -16,7 +17,9 @@ import {
 } from "../controllers/fillers.js";
 import { ctrlWrapper } from "../utils/ctrlWrapper.js";
 import {
-	createFillerSchema,
+	createFillerAdminSchema,
+	updateFillerAdminSchema,
+	// createFillerSchema,
 	updateFillerSchema,
 } from "../validation/fillers.js";
 import { validateBody } from "../middlewares/validateBody.js";
@@ -46,13 +49,21 @@ router.get("/top-sales", ctrlWrapper(getTopSalesController));
 
 router.get("/:fillerId", isValidId, ctrlWrapper(getFillerByIdController));
 
+// router.post(
+// 	"/",
+// 	authenticate,
+// 	upload.single("photo"),
+// 	jsonParser,
+// 	validateBody(createFillerSchema),
+// 	ctrlWrapper(createFillerController)
+// );
+
 router.post(
 	"/",
-	authenticate,
-	// upload.single("photo"),
+	upload.array("img", 3),
 	jsonParser,
-	validateBody(createFillerSchema),
-	ctrlWrapper(createFillerController)
+	validateBody(createFillerAdminSchema),
+	ctrlWrapper(createFillerAdminController)
 );
 
 // router.post(
@@ -63,19 +74,19 @@ router.post(
 
 router.delete("/:id", isValidId, ctrlWrapper(deleteFillerController));
 
-router.put(
-	"/:fillerId",
-	isValidId,
-	upload.single("photo"),
-	validateBody(createFillerSchema),
-	ctrlWrapper(upsertFillerController)
-);
+// router.put(
+// 	"/:fillerId",
+// 	isValidId,
+// 	upload.single("photo"),
+// 	validateBody(createFillerSchema),
+// 	ctrlWrapper(upsertFillerController)
+// );
 
 router.patch(
-	"/:fillerId",
+	"/:id",
 	isValidId,
-	upload.single("photo"),
-	validateBody(updateFillerSchema),
+	upload.array("img", 3),
+	validateBody(updateFillerAdminSchema),
 	ctrlWrapper(patchFillerController)
 );
 

@@ -346,9 +346,9 @@ export const deleteFiller = async (id) => {
 	return filler;
 };
 
-export const updateFiller = async (fillerId, userId, payload, options = {}) => {
+export const updateFiller = async (id, payload, options = {}) => {
 	const rawResult = await FillersCollection.findOneAndUpdate(
-		{ _id: fillerId, userId },
+		{ _id: id },
 		payload,
 		{ new: true, includeResultMetadata: true, ...options }
 	);

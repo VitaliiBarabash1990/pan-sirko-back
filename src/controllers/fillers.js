@@ -20,6 +20,8 @@ import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { env } from "../utils/env.js";
 import { UsersCollection } from "../db/models/user.js";
+import mongoose from "mongoose";
+const { Promise } = mongoose;
 
 // export const getFillersController = async (req, res) => {
 // 	const fillers = await getAllFillers();
@@ -208,49 +210,80 @@ export const getFillerByIdController = async (req, res) => {
 	});
 };
 
-export const createFillerController = async (req, res) => {
-	const photo = req.file;
-	let photoUrl;
+// export const createFillerController = async (req, res) => {
+// 	const photo = req.file;
+// 	let photoUrl;
 
-	if (photo) {
+// 	if (photo) {
+// 		if (env("ENABLE_CLOUDINARY") === "true") {
+// 			photoUrl = await saveFileToCloudinary(photo);
+// 		} else {
+// 			photoUrl = await saveFileToUploadDir(photo);
+// 		}
+// 	}
+
+// 	const filler = {
+// 		img: req.body.img,
+// 		article: req.body.article,
+// 		stars: req.body.stars,
+// 		text: req.body.text,
+// 		description: req.body.description,
+// 		price: req.body.price,
+// 		reviews: req.body.reviews,
+// 		wages: req.body.wages,
+// 		description_title: req.body.description_title,
+// 		description_text: req.body.description_text,
+// 		benefits_title: req.body.benefits_title,
+// 		benefits_text: req.body.benefits_text,
+// 		Regulations_title: req.body.Regulations_title,
+// 		Regulations_text: req.body.Regulations_text,
+// 		type_goods: req.body.type_goods,
+// 		brand: req.body.brand,
+// 		view: req.body.view,
+// 		wage: req.body.wage,
+// 		type: req.body.type,
+// 		features: req.body.features,
+// 		volume: req.body.volume,
+// 		country: req.body.country,
+
+// 		userId: req.user.id,
+// 		photo: photoUrl,
+// 	};
+
+// 	const result = await createFiller(filler);
+
+// 	res.status(201).json({
+// 		status: 201,
+// 		message: "Successfully created a filler!",
+// 		data: result,
+// 	});
+// };
+
+export const createFillerAdminController = async (req, res) => {
+	const files = req.files;
+	let imageUrls = [];
+
+	if (files && files.length > 0) {
 		if (env("ENABLE_CLOUDINARY") === "true") {
-			photoUrl = await saveFileToCloudinary(photo);
+			imageUrls = [];
+
+			for (const file of files) {
+				const url = await saveFileToCloudinary(file);
+				imageUrls.push(url);
+			}
 		} else {
-			photoUrl = await saveFileToUploadDir(photo);
+			imageUrls = await Promise.all(files.map(saveFileToUploadDir));
 		}
 	}
 
 	const filler = {
-		img: req.body.img,
-		article: req.body.article,
-		stars: req.body.stars,
-		text: req.body.text,
-		description: req.body.description,
-		price: req.body.price,
-		reviews: req.body.reviews,
-		wages: req.body.wages,
-		description_title: req.body.description_title,
-		description_text: req.body.description_text,
-		benefits_title: req.body.benefits_title,
-		benefits_text: req.body.benefits_text,
-		Regulations_title: req.body.Regulations_title,
-		Regulations_text: req.body.Regulations_text,
-		type_goods: req.body.type_goods,
-		brand: req.body.brand,
-		view: req.body.view,
-		wage: req.body.wage,
-		type: req.body.type,
-		features: req.body.features,
-		volume: req.body.volume,
-		country: req.body.country,
-
-		userId: req.user.id,
-		photo: photoUrl,
+		...req.body,
+		img: imageUrls,
 	};
 
 	const result = await createFiller(filler);
 
-	res.status(201).json({
+	return res.status(201).json({
 		status: 201,
 		message: "Successfully created a filler!",
 		data: result,
@@ -292,16 +325,21 @@ export const upsertFillerController = async (req, res, next) => {
 };
 
 export const patchFillerController = async (req, res, next) => {
-	const { fillerId } = req.params;
-	const photo = req.file;
+	const { id } = req.params;
+	console.log("ID", id);
+	const photos = req.files;
 
-	let photoUrl;
+	let photoUrls = [];
 
-	if (photo) {
-		if (env("ENABLE_CLOUDINARY") === "true") {
-			photoUrl = await saveFileToCloudinary(photo);
-		} else {
-			photoUrl = await saveFileToUploadDir(photo);
+	if (photos && photos.length) {
+		for (const photo of photos) {
+			let url;
+			if (env("ENABLE_CLOUDINARY") === "true") {
+				url = await saveFileToCloudinary(photo);
+			} else {
+				url = await saveFileToUploadDir(photo);
+			}
+			photoUrls.push(url);
 		}
 	}
 
@@ -310,9 +348,9 @@ export const patchFillerController = async (req, res, next) => {
 	// }
 
 	// const result = await updateContact(contactId, req.user.id, req.body);
-	const result = await updateFiller(fillerId, req.user.id, {
+	const result = await updateFiller(id, {
 		...req.body,
-		photo: photoUrl,
+		photo: photoUrls,
 	});
 
 	if (!result) {
