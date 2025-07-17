@@ -8,6 +8,7 @@ const reviewSchema = new mongoose.Schema(
 			ref: "Product",
 		},
 		author: String,
+		avatar: String,
 		rating: Number,
 		comment: String,
 		date: {

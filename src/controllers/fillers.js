@@ -59,6 +59,7 @@ export const getFillersController = async (req, res) => {
 		sort,
 		firstPageLimit,
 		nextPageLimit,
+		onlyReviewed,
 	} = req.query;
 
 	const { fillers, total, stats } = await getFilteredFillers(
@@ -73,6 +74,7 @@ export const getFillersController = async (req, res) => {
 			sort,
 			firstPageLimit: Number(firstPageLimit),
 			nextPageLimit: Number(nextPageLimit),
+			onlyReviewed: onlyReviewed === "true",
 		}
 	);
 
@@ -91,7 +93,9 @@ export const getFillersController = async (req, res) => {
 };
 
 export const createReviewController = async (req, res) => {
+	// console.log("DataRewiews", req.body);
 	const { email, ...reviewData } = req.body;
+	console.log("RequestReviews", req.body);
 
 	// Перевіряємо, чи передано email
 	if (!email) {
@@ -131,7 +135,7 @@ export const getReviewsByOwnerController = async (req, res) => {
 
 export const createReplyController = async (req, res) => {
 	const { reviewId } = req.params;
-	const { parentReplyId, author, comment, email } = req.body;
+	const { parentReplyId, author, comment, email, id_owner, avatar } = req.body;
 
 	if (!email) {
 		throw createHttpError(400, "Email is required");
@@ -145,10 +149,12 @@ export const createReplyController = async (req, res) => {
 
 	// Створення відповіді
 	const newReply = await createReply({
+		id_owner,
 		reviewId,
 		parentReplyId,
 		author,
 		comment,
+		avatar,
 	});
 
 	if (!newReply) {

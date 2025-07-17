@@ -149,7 +149,12 @@ export const getFilteredFillers = async (
 	page = 1,
 	queryParams = {}
 ) => {
-	const { firstPageLimit = 6, nextPageLimit = 2, ...filters } = queryParams;
+	const {
+		firstPageLimit = 6,
+		nextPageLimit = 2,
+		onlyReviewed,
+		...filters
+	} = queryParams;
 
 	const isFirstPage = page === 1;
 	const limit = isFirstPage ? firstPageLimit : nextPageLimit;
@@ -183,6 +188,11 @@ export const getFilteredFillers = async (
 		filter.price = {};
 		if (filters.minPrice) filter.price.$gte = Number(filters.minPrice);
 		if (filters.maxPrice) filter.price.$lte = Number(filters.maxPrice);
+	}
+
+	// ✅ Додаємо фільтр за count_reviews > 0
+	if (onlyReviewed) {
+		filter.count_reviews = { $gt: 0 };
 	}
 
 	let sortOption = {};
@@ -236,6 +246,15 @@ export const getFilteredFillers = async (
 };
 
 export const createReview = async (data) => {
+	// console.log("Data", data);
+	const { id_owner } = data;
+	if (id_owner && typeof id_owner === "string") {
+		await FillersCollection.findByIdAndUpdate(
+			id_owner,
+			{ $inc: { count_reviews: 1 } },
+			{ new: true }
+		);
+	}
 	return await ReviewsCollection.create(data);
 };
 
@@ -281,16 +300,29 @@ const buildRepliesTree = (allReplies, parentId = null) => {
 };
 
 export const createReply = async ({
+	id_owner,
 	reviewId,
 	parentReplyId = null,
 	author,
 	comment,
+	avatar,
 	date = new Date(),
 }) => {
+	// console.log("Data", data);
+	// const { id_owner } = data;
+	if (id_owner && typeof id_owner === "string") {
+		await FillersCollection.findByIdAndUpdate(
+			id_owner,
+			{ $inc: { count_reviews: 1 } },
+			{ new: true }
+		);
+	}
 	return await reply.create({
+		id_owner,
 		commentId: reviewId,
 		parentReplyId,
 		author,
+		avatar,
 		comment,
 		date,
 	});
@@ -298,7 +330,7 @@ export const createReply = async ({
 
 export const deleteReview = async (reviewId) => {
 	// 1. Видаляємо всі репліки, які належать цьому рев’ю
-	await Reply.deleteMany({ commentId: reviewId });
+	await reply.deleteMany({ commentId: reviewId });
 
 	// 2. Видаляємо сам рев’ю
 	const deletedReview = await ReviewsCollection.findByIdAndDelete(reviewId);

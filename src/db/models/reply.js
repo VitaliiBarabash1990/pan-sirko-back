@@ -2,6 +2,11 @@ import mongoose from "mongoose";
 
 const replySchema = new mongoose.Schema(
 	{
+		id_owner: {
+			type: mongoose.Schema.Types.ObjectId,
+			required: true,
+			ref: "Product",
+		},
 		commentId: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "ReviewsCollection",
@@ -13,6 +18,7 @@ const replySchema = new mongoose.Schema(
 			default: null,
 		},
 		author: String,
+		avatar: String,
 		comment: String,
 		date: {
 			type: Date,
