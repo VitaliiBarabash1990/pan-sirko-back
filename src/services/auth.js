@@ -90,6 +90,7 @@ export const registerUser = async (payload) => {
 			phone: createdUser.phone,
 			email: createdUser.email,
 			avatar: createdUser.avatar,
+			// role: createdUser.role,
 			accessToken: session.accessToken,
 			userId: session.userId,
 		};
@@ -134,6 +135,7 @@ export const loginUser = async (payload) => {
 		phone: user.phone,
 		email: user.email,
 		avatar: user.avatar,
+		// role: user.role,
 		accessToken: createdSession.accessToken,
 		refreshToken: createdSession.refreshToken, // ← додай
 		sessionId: createdSession._id, // ← додай
@@ -141,6 +143,42 @@ export const loginUser = async (payload) => {
 		_id: createdSession._id,
 	};
 	return result;
+};
+
+export const adminLoginService = async (payload) => {
+	const user = await UsersCollection.findOne({ email: payload.email });
+	if (!user) throw createHttpError(404, "Admin not found");
+	if (user.role !== "admin") throw createHttpError(403, "Forbidden");
+
+	const isEqual = await bcrypt.compare(payload.password, user.password);
+	if (!isEqual) throw createHttpError(401, "Unauthorized");
+
+	await SessionsCollection.deleteOne({ userId: user._id });
+
+	const accessToken = randomBytes(30).toString("base64");
+	const refreshToken = randomBytes(30).toString("base64");
+
+	const createdSession = await SessionsCollection.create({
+		userId: user._id,
+		accessToken,
+		refreshToken,
+		accessTokenValidUntil: new Date(Date.now() + FIFTEEN_MINUTES),
+		refreshTokenValidUntil: new Date(Date.now() + ONE_DAY),
+	});
+
+	return {
+		name: user.name,
+		second_name: user.second_name,
+		phone: user.phone,
+		email: user.email,
+		avatar: user.avatar,
+		role: user.role,
+		accessToken: createdSession.accessToken,
+		refreshToken: createdSession.refreshToken,
+		sessionId: createdSession._id,
+		userId: createdSession.userId,
+		_id: createdSession._id,
+	};
 };
 
 export const logoutUser = async (sessionId) => {

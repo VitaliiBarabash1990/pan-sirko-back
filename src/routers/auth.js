@@ -17,6 +17,7 @@ import {
 	updateUserController,
 	getOAuthURLController,
 	confirmOAuthController,
+	adminLoginController,
 } from "../controllers/auth.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { requestResetEmailController } from "../controllers/contacts.js";
@@ -38,6 +39,12 @@ router.post(
 	"/login",
 	validateBody(loginUserSchema),
 	ctrlWrapper(loginUserController)
+);
+
+router.post(
+	"/adminlogin",
+	validateBody(loginUserSchema),
+	ctrlWrapper(adminLoginController)
 );
 
 router.post("/logout", ctrlWrapper(logoutUserController));

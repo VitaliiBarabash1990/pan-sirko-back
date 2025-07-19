@@ -6,6 +6,7 @@ import {
 	resetPassword,
 	updateUser,
 	loginOrRegister,
+	adminLoginService,
 } from "../services/auth.js";
 import { generateOAuthURL, validateCode } from "../utils/googleOAuth2.js";
 import { ONE_DAY } from "../constants/index.js";
@@ -50,6 +51,33 @@ export const loginUserController = async (req, res) => {
 		data: {
 			data: session,
 		},
+	});
+};
+
+export const adminLoginController = async (req, res) => {
+	const session = await adminLoginService(req.body);
+
+	res.cookie("refreshToken", session.refreshToken, {
+		httpOnly: true,
+		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
+	});
+	res.cookie("sessionId", session._id, {
+		httpOnly: true,
+		expires: new Date(Date.now() + ONE_DAY),
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
+	});
+
+	res.json({
+		status: 200,
+		message: "Successfully logged in an admin!",
+		data: { data: session },
 	});
 };
 

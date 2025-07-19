@@ -190,6 +190,12 @@ export const getFilteredFillers = async (
 		if (filters.maxPrice) filter.price.$lte = Number(filters.maxPrice);
 	}
 
+	// ✅ Додаємо пошук по article або text
+	if (filters.search) {
+		const searchRegex = { $regex: filters.search, $options: "i" };
+		filter.$or = [{ article: searchRegex }, { text: searchRegex }];
+	}
+
 	// ✅ Додаємо фільтр за count_reviews > 0
 	if (onlyReviewed) {
 		filter.count_reviews = { $gt: 0 };

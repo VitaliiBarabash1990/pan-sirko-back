@@ -60,6 +60,7 @@ export const getFillersController = async (req, res) => {
 		firstPageLimit,
 		nextPageLimit,
 		onlyReviewed,
+		search,
 	} = req.query;
 
 	const { fillers, total, stats } = await getFilteredFillers(
@@ -75,6 +76,7 @@ export const getFillersController = async (req, res) => {
 			firstPageLimit: Number(firstPageLimit),
 			nextPageLimit: Number(nextPageLimit),
 			onlyReviewed: onlyReviewed === "true",
+			search,
 		}
 	);
 
