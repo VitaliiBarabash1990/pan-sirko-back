@@ -418,6 +418,26 @@ handlebars.registerHelper("calcTotal", (price, qty) => {
 
 export const requestSendEmail = async (order) => {
 	try {
+		// if (order.description && typeof order.description === "string") {
+		// 	const maxLength = 20; // кількість символів
+		// 	if (order.description.length > maxLength) {
+		// 		order.description = order.description.slice(0, maxLength) + "...";
+		// 	}
+		// }
+
+		// Обрізаємо description для кожного товару
+		if (Array.isArray(order.items)) {
+			const maxLength = 75; // кількість символів
+			order.items = order.items.map((item) => {
+				if (item.description && typeof item.description === "string") {
+					if (item.description.length > maxLength) {
+						item.description = item.description.slice(0, maxLength) + "...";
+					}
+				}
+				return item;
+			});
+		}
+
 		const orderTemplatePath = path.join(
 			TEMPLATES_DIR,
 			"order-confirmation.html"

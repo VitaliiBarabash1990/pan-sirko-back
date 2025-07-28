@@ -9,7 +9,7 @@ import { BlogsCollection } from "../db/models/blogs.js";
 import { reply } from "../db/models/reply.js";
 
 export const getPaginatedBlogs = async (page = 1, search = "") => {
-	const limit = 10;
+	const limit = 6;
 	const skip = (page - 1) * limit;
 
 	const filter = {};

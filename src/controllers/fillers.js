@@ -132,6 +132,7 @@ export const getReviewsByOwnerController = async (req, res) => {
 	res.status(200).json({
 		status: 200,
 		data: reviews,
+		total: reviews.length,
 	});
 };
 
@@ -385,7 +386,7 @@ export const requestResetEmailController = async (req, res) => {
 export const getTopSalesController = async (req, res) => {
 	const page = parseInt(req.query.page, 20) || 1;
 
-	const firstPageLimit = 2;
+	const firstPageLimit = 6;
 	const nextPageLimit = 2;
 
 	const isFirstPage = page === 1;
