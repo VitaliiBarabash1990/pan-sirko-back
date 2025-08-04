@@ -5,6 +5,7 @@ import authRouter from "./auth.js";
 import novaposhta from "./novaposhta.js";
 import blogsRouter from "./blogs.js";
 import categoryRouter from "./category.js";
+import sectionsRouter from "./sections.js";
 import { authenticate } from "../middlewares/authenticate.js";
 
 const router = express.Router();
@@ -20,5 +21,7 @@ router.use("/novaposhta", novaposhta);
 router.use("/blogs", blogsRouter);
 
 router.use("/category", categoryRouter);
+
+router.use("/sections", sectionsRouter);
 
 export default router;
