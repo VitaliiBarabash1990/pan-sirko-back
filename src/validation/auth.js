@@ -11,6 +11,9 @@ export const registerUserSchema = Joi.object({
 		}),
 	email: Joi.string().email().required(),
 	password: Joi.string().required(),
+	terms: Joi.boolean().valid(true).required().messages({
+		"any.only": "You must accept the terms and conditions",
+	}),
 });
 
 export const loginUserSchema = Joi.object({

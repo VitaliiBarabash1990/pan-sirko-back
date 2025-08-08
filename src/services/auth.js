@@ -68,9 +68,14 @@ export const registerUser = async (payload) => {
 
 		const encryptedPassword = await bcrypt.hash(payload.password, 10);
 
+		const termsBool = payload.terms === true || payload.terms === "true";
+
 		const createdUser = await UsersCollection.create({
 			...payload,
 			password: encryptedPassword,
+			consentGiven: termsBool,
+			consentDate: termsBool ? new Date() : null,
+			consentPolicyVersion: termsBool ? "1.0" : null,
 		});
 
 		const accessToken = randomBytes(30).toString("base64");
@@ -185,7 +190,7 @@ export const logoutUser = async (sessionId) => {
 	await SessionsCollection.deleteOne({ _id: sessionId });
 };
 
-const createSession = () => {
+export const createSession = () => {
 	const accessToken = randomBytes(30).toString("base64");
 	const refreshToken = randomBytes(30).toString("base64");
 

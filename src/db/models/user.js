@@ -20,6 +20,9 @@ const usersSchema = new Schema(
 			enum: ["user", "admin", "manager"],
 			default: "user",
 		},
+		consentGiven: { type: Boolean, default: false },
+		consentDate: { type: Date, default: null },
+		consentPolicyVersion: { type: String, default: null },
 	},
 	{ timestamps: true, versionKey: false }
 );
