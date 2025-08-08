@@ -214,14 +214,23 @@ export const refreshUsersSession = async ({ sessionId, refreshToken }) => {
 		throw createHttpError(401, "Session token expired");
 	}
 
-	const newSession = createSession();
+	// Генеруємо нові токени (функція повинна повертати об'єкт з токенами і датами)
+	const {
+		accessToken,
+		refreshToken: newRefreshToken,
+		accessTokenValidUntil,
+		refreshTokenValidUntil,
+	} = createSession();
 
-	await SessionsCollection.deleteOne({ _id: sessionId, refreshToken });
+	// Оновлюємо існуючу сесію
+	session.accessToken = accessToken;
+	session.refreshToken = newRefreshToken;
+	session.accessTokenValidUntil = accessTokenValidUntil;
+	session.refreshTokenValidUntil = refreshTokenValidUntil;
 
-	return await SessionsCollection.create({
-		userId: session.userId,
-		...newSession,
-	});
+	await session.save();
+
+	return session;
 };
 
 // export const requestResetToken = async (email) => {

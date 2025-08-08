@@ -4,7 +4,7 @@ const categorySchema = new Schema(
 	{
 		icon: {
 			type: String,
-			required: true,
+			required: false,
 		},
 		name: {
 			type: String,
@@ -15,7 +15,9 @@ const categorySchema = new Schema(
 			required: true,
 		},
 		status_active: { type: Boolean, required: true, default: true },
+		filters: { type: [String], required: false },
 	},
+
 	{
 		timestamps: true,
 		versionKey: false,

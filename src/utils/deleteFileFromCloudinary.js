@@ -3,8 +3,8 @@ import { env } from "./env.js";
 import { CLOUDINARY } from "../constants/index.js";
 
 // Debug:
-console.log("Cloud name:", env(CLOUDINARY.CLOUD_NAME));
-console.log("typeof env:", typeof env);
+// console.log("Cloud name:", env(CLOUDINARY.CLOUD_NAME));
+// console.log("typeof env:", typeof env);
 
 cloudinary.config({
 	secure: true,

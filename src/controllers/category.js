@@ -43,22 +43,28 @@ export const createCategoryController = async (req, res) => {
 };
 
 export const updateCategoryController = async (req, res) => {
-	const { id, icon_deleted } = req.body;
-	let iconUrl = null;
+	const { id, icon_deleted, ...restBody } = req.body;
+
+	const updateData = { ...restBody };
+
+	// let iconUrl = null;
 
 	if (req.file) {
-		iconUrl =
+		const iconUrl =
 			env("ENABLE_CLOUDINARY") === "true"
 				? await saveFileToCloudinary(req.file)
 				: await saveFileToUploadDir(req.file);
+		updateData.icon = iconUrl;
 	} else if (icon_deleted === "true") {
-		iconUrl = "";
+		// iconUrl = "";
+		updateData.icon = "";
 	}
 
 	const updatedCategory = await updateCategory({
 		id,
-		...req.body,
-		icon: iconUrl,
+		...updateData,
+		// ...req.body,
+		// icon: iconUrl,
 	});
 
 	res.status(200).json({

@@ -18,7 +18,7 @@ export const getSectionsController = async (req, res) => {
 };
 
 export const createSectionsController = async (req, res) => {
-	console.log("FormData", req.body);
+	// console.log("FormData", req.body);
 	const icons = req.files;
 
 	let imgUrls = [];

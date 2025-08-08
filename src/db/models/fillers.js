@@ -1,21 +1,21 @@
 import { model, Schema } from "mongoose";
 
-const allowedTypes = ["toys", "houses", "fillers"];
-const allowedTypesForType = [
-	"Бентонітовий",
-	"Соєво-кукурудзяний",
-	"Кукурудзяний",
-	"Будиночок",
-	"Лежак",
-	"Матрац",
-	"Мякі",
-	"Інтерактивні",
-	"З котячою мятою",
-	"Мяч",
-	"Дражнилки",
-	"Для ласощів",
-	"З лазером",
-];
+// const allowedTypes = ["toys", "houses", "fillers"];
+// const allowedTypesForType = [
+// 	"Бентонітовий",
+// 	"Соєво-кукурудзяний",
+// 	"Кукурудзяний",
+// 	"Будиночок",
+// 	"Лежак",
+// 	"Матрац",
+// 	"Мякі",
+// 	"Інтерактивні",
+// 	"З котячою мятою",
+// 	"Мяч",
+// 	"Дражнилки",
+// 	"Для ласощів",
+// 	"З лазером",
+// ];
 
 const fillersSchema = new Schema(
 	{
@@ -39,7 +39,8 @@ const fillersSchema = new Schema(
 		brand: { type: String, required: false },
 		view: { type: String, required: false },
 		wage: { type: Number, required: false },
-		type: { type: String, enum: allowedTypesForType, default: "Бентонітовий" },
+		// type: { type: String, enum: allowedTypesForType, default: "Бентонітовий" },
+		type: { type: String, default: "Бентонітовий" },
 		features: {
 			type: String,
 			enum: ["З ароматом", "Без аромату"],
@@ -48,9 +49,13 @@ const fillersSchema = new Schema(
 		volume: { type: Number, required: false },
 		country: { type: String, required: false },
 		qty: { type: String, required: false },
+		// type_goods: {
+		// 	type: String,
+		// 	enum: allowedTypes,
+		// 	default: "fillers",
+		// },
 		type_goods: {
 			type: String,
-			enum: allowedTypes,
 			default: "fillers",
 		},
 		availability: { type: Boolean, required: false, default: true },

@@ -28,21 +28,21 @@ export const registerUserController = async (req, res) => {
 
 export const loginUserController = async (req, res) => {
 	const session = await loginUser(req.body);
-	res.cookie("refreshToken", session.refreshToken, {
+	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
-	res.cookie("sessionId", session._id, {
+	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
 
 	res.json({
@@ -57,21 +57,21 @@ export const loginUserController = async (req, res) => {
 export const adminLoginController = async (req, res) => {
 	const session = await adminLoginService(req.body);
 
-	res.cookie("refreshToken", session.refreshToken, {
+	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
-	res.cookie("sessionId", session._id, {
+	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "Lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "Lax",
+		secure: false,
 	});
 
 	res.json({
@@ -92,21 +92,21 @@ export const logoutUserController = async (req, res) => {
 };
 
 const setupSession = (res, session) => {
-	res.cookie("refreshToken", session.refreshToken, {
+	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "lax",
+		secure: false,
 	});
-	res.cookie("sessionId", session._id, {
+	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		sameSite: "none",
-		secure: true,
-		// sameSite: "lax",
-		// secure: false,
+		// sameSite: "none",
+		// secure: true,
+		sameSite: "lax",
+		secure: false,
 	});
 };
 
@@ -115,6 +115,8 @@ export const refreshUserSessionController = async (req, res) => {
 		sessionId: req.cookies.sessionId,
 		refreshToken: req.cookies.refreshToken,
 	});
+
+	// console.log("Session from DB:", session._id.toString(), session.refreshToken);
 
 	setupSession(res, session);
 	// console.log("Cookies:", req.cookies);
@@ -177,7 +179,7 @@ export async function getOAuthURLController(req, res) {
 
 export async function confirmOAuthController(req, res) {
 	const { code } = req.body;
-	console.log("OAuth code:", code);
+	// console.log("OAuth code:", code);
 
 	console.log(code);
 	const ticket = await validateCode(code);
