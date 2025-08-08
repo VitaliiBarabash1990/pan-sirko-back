@@ -31,18 +31,18 @@ export const loginUserController = async (req, res) => {
 	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "Lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "Lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 
 	res.json({
@@ -60,18 +60,18 @@ export const adminLoginController = async (req, res) => {
 	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "Lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "Lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "Lax",
+		// secure: false,
 	});
 
 	res.json({
@@ -95,18 +95,18 @@ const setupSession = (res, session) => {
 	res.cookie("refreshToken", session.refreshToken.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "lax",
+		// secure: false,
 	});
 	res.cookie("sessionId", session._id.toString(), {
 		httpOnly: true,
 		expires: new Date(Date.now() + ONE_DAY),
-		// sameSite: "none",
-		// secure: true,
-		sameSite: "lax",
-		secure: false,
+		sameSite: "none",
+		secure: true,
+		// sameSite: "lax",
+		// secure: false,
 	});
 };
 
