@@ -15,7 +15,6 @@ import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { saveFileToUploadDir } from "../utils/saveFileToUploadDir.js";
 
 export const registerUserController = async (req, res) => {
-	console.log("data", req.body);
 	const { user, session } = await registerUser(req.body);
 
 	setupSession(res, session);
