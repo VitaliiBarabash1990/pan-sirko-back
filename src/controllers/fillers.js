@@ -12,6 +12,7 @@ import {
 	getReviewsWithReplies,
 	getTopSales,
 	requestSendEmail,
+	requestSendTelegram,
 	updateFiller,
 } from "../services/fillers.js";
 
@@ -21,6 +22,7 @@ import { saveFileToCloudinary } from "../utils/saveFileToCloudinary.js";
 import { env } from "../utils/env.js";
 import { UsersCollection } from "../db/models/user.js";
 import mongoose from "mongoose";
+import { FillersCollection } from "../db/models/fillers.js";
 const { Promise } = mongoose;
 
 // export const getFillersController = async (req, res) => {
@@ -335,7 +337,6 @@ export const upsertFillerController = async (req, res, next) => {
 
 export const patchFillerController = async (req, res, next) => {
 	const { id } = req.params;
-	console.log("ID", id);
 	const photos = req.files;
 
 	let photoUrls = [];
@@ -352,15 +353,25 @@ export const patchFillerController = async (req, res, next) => {
 		}
 	}
 
-	// if (photo) {
-	//   photoUrl = await saveFileToUploadDir(photo);
-	// }
+	// Завантажуємо існуючий filler, щоб взяти старі фото
+	const existingFiller = await FillersCollection.findById(id);
 
-	// const result = await updateContact(contactId, req.user.id, req.body);
-	const result = await updateFiller(id, {
+	if (!existingFiller) {
+		return next(createHttpError(404, `Filler not found`));
+	}
+
+	// Об'єднуємо старі та нові фото (якщо є нові)
+	const updatedPhotos = existingFiller.img
+		? [...existingFiller.img, ...photoUrls]
+		: photoUrls;
+
+	// Оновлюємо з урахуванням фото
+	const updatePayload = {
 		...req.body,
-		photo: photoUrls,
-	});
+		img: updatedPhotos,
+	};
+
+	const result = await updateFiller(id, updatePayload);
 
 	if (!result) {
 		next(createHttpError(404, `Filler not found`));
@@ -369,7 +380,7 @@ export const patchFillerController = async (req, res, next) => {
 
 	res.json({
 		status: 200,
-		message: `Succsessfully patched a filler!`,
+		message: `Successfully patched a filler!`,
 		data: result.filler,
 	});
 };
@@ -406,6 +417,16 @@ export const getTopSalesController = async (req, res) => {
 export const sendEmailController = async (req, res) => {
 	console.log(req.body);
 	await requestSendEmail(req.body); // передаємо весь об'єкт
+	res.json({
+		message: "Order was successfully sent to email!",
+		status: 200,
+		data: {},
+	});
+};
+
+export const sendTelegramController = async (req, res) => {
+	console.log(req.body);
+	await requestSendTelegram(req.body); // передаємо весь об'єкт
 	res.json({
 		message: "Order was successfully sent to email!",
 		status: 200,

@@ -21,7 +21,10 @@ import {
 } from "../controllers/auth.js";
 import { validateBody } from "../middlewares/validateBody.js";
 import { requestResetEmailController } from "../controllers/contacts.js";
-import { sendEmailController } from "../controllers/fillers.js";
+import {
+	sendEmailController,
+	sendTelegramController,
+} from "../controllers/fillers.js";
 import { authenticate } from "../middlewares/authenticate.js";
 import { upload } from "../middlewares/multer.js";
 
@@ -60,6 +63,12 @@ router.patch(
 );
 
 router.post("/send-order", jsonParser, ctrlWrapper(sendEmailController));
+
+router.post(
+	"/send-order-telegram",
+	jsonParser,
+	ctrlWrapper(sendTelegramController)
+);
 
 router.post(
 	"/send-reset-email",

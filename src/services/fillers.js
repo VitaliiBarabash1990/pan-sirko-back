@@ -1,6 +1,6 @@
-import { SORT_ORDER } from "../constants/index.js";
+// import { SORT_ORDER } from "../constants/index.js";
 import { FillersCollection } from "../db/models/fillers.js";
-import { calculatePaginationData } from "../utils/calculatePaginationData.js";
+// import { calculatePaginationData } from "../utils/calculatePaginationData.js";
 import { sendEmail } from "../utils/sendMail.js";
 import handlebars from "handlebars";
 import path from "node:path";
@@ -9,6 +9,9 @@ import fs from "node:fs/promises";
 import { env } from "../utils/env.js";
 import { ReviewsCollection } from "../db/models/reviews.js";
 import { reply } from "../db/models/reply.js";
+// import { sendTelegramMessage } from "../utils/telegram.js";
+import { escapeHtml } from "../utils/escapeHtml.js";
+import { chunkAndSend } from "../utils/chunkTelegram.js";
 
 // export const getAllFillers = async () => {
 // 	const fillers = await FillersCollection.find();
@@ -418,13 +421,6 @@ handlebars.registerHelper("calcTotal", (price, qty) => {
 
 export const requestSendEmail = async (order) => {
 	try {
-		// if (order.description && typeof order.description === "string") {
-		// 	const maxLength = 20; // кількість символів
-		// 	if (order.description.length > maxLength) {
-		// 		order.description = order.description.slice(0, maxLength) + "...";
-		// 	}
-		// }
-
 		// Обрізаємо description для кожного товару
 		if (Array.isArray(order.items)) {
 			const maxLength = 75; // кількість символів
@@ -471,5 +467,143 @@ export const requestSendEmail = async (order) => {
 	} catch (error) {
 		console.error("❌ Помилка при обробці замовлення:", error);
 		throw error; // Щоб сервер повернув 500, або можеш кинути власну помилку з кодом/текстом
+	}
+};
+
+// export const requestSendTelegram = async (order) => {
+// 	try {
+// 		let msg = `<b>📦 Нове замовлення з сайту</b>\n\n`;
+// 		msg += `🕒 Дата: ${new Date().toLocaleString("uk-UA")}\n`;
+
+// 		if (order.name) msg += `👤 Ім'я: ${order.name}\n`;
+// 		if (order.phone) msg += `📞 Телефон: ${order.phone}\n`;
+// 		if (order.city) msg += `🏙 Місто: ${order.city}\n`;
+// 		if (order.street) msg += `🚪 Вулиця: ${order.street}\n`;
+// 		if (order.house) msg += `🏠 Будинок: ${order.house}\n`;
+// 		if (order.department) msg += `📦 Відділення: ${order.department}\n`;
+// 		if (order.post) msg += `🏤 Поштовий індекс: ${order.post}\n`;
+// 		if (order.address) msg += `📍 Адреса: ${order.address}\n`;
+// 		if (order.method) msg += `🚚 Спосіб доставки: ${order.method}\n`;
+// 		if (order.payment) msg += `💳 Оплата: ${order.payment}\n`;
+// 		if (order.comment) msg += `💬 Коментар: ${order.comment}\n`;
+// 		if (order.call) msg += `📞 Телефонний дзвінок: ${order.call}\n`;
+
+// 		msg += `\n`;
+
+// 		if (Array.isArray(order.items) && order.items.length > 0) {
+// 			msg += `<b>🛒 Список товарів:</b>\n`;
+// 			order.items.forEach((item, idx) => {
+// 				msg += `\n${idx + 1}. <b>${item.text}</b>`;
+// 				if (item.article) msg += `\n   🔖 Артикул: ${item.article}`;
+// 				if (item.description) msg += `\n   📝 Опис: ${item.description}`;
+// 				if (item.qty) msg += `\n   📦 Кількість: ${item.qty}`;
+// 				if (item.wage) msg += `\n   ⚖️ Вага: ${item.wage}`;
+// 				if (item.discounted_price)
+// 					msg += `\n   💲 Ціна: ${item.discounted_price} грн`;
+// 				if (item.qty && item.discounted_price) {
+// 					const total = (item.qty * item.discounted_price).toFixed(2);
+// 					msg += `\n   💰 Разом: <b>${total} грн</b>`;
+// 				}
+// 				msg += `\n`;
+// 			});
+// 		} else {
+// 			msg += `❌ Товари не вказані\n`;
+// 		}
+
+// 		await sendTelegramMessage(env("TELEGRAM_CHAT_ID"), msg);
+// 	} catch (error) {
+// 		console.error("❌ Помилка при обробці замовлення:", error);
+// 		throw error;
+// 	}
+// };
+
+export const requestSendTelegram = async (order) => {
+	try {
+		// 1) Обрізання description як у поштовій версії
+		if (Array.isArray(order.items)) {
+			const maxLength = 75;
+			order.items = order.items.map((item) => {
+				if (item?.description && typeof item.description === "string") {
+					if (item.description.length > maxLength) {
+						item.description = item.description.slice(0, maxLength) + "...";
+					}
+				}
+				return item;
+			});
+		}
+
+		// 2) Формування повідомлення (HTML-safe)
+		const createdAt = new Date().toLocaleString("uk-UA");
+
+		let msg = `<b>📦 Нове замовлення з сайту</b>\n\n`;
+		msg += `🕒 Дата: ${escapeHtml(createdAt)}\n`;
+
+		if (order.name) msg += `👤 Ім'я: ${escapeHtml(order.name)}\n`;
+		if (order.phone) msg += `📞 Телефон: ${escapeHtml(order.phone)}\n`;
+		if (order.city) msg += `🏙 Місто: ${escapeHtml(order.city)}\n`;
+		if (order.street) msg += `🚪 Вулиця: ${escapeHtml(order.street)}\n`;
+		if (order.house) msg += `🏠 Будинок: ${escapeHtml(order.house)}\n`;
+		if (order.department)
+			msg += `📦 Відділення: ${escapeHtml(order.department)}\n`;
+		if (order.post) msg += `🏤 Поштовий індекс: ${escapeHtml(order.post)}\n`;
+		if (order.address) msg += `📍 Адреса: ${escapeHtml(order.address)}\n`;
+		if (order.method)
+			msg += `🚚 Спосіб доставки: ${escapeHtml(order.method)}\n`;
+		if (order.payment) msg += `💳 Оплата: ${escapeHtml(order.payment)}\n`;
+		if (order.comment) msg += `💬 Коментар: ${escapeHtml(order.comment)}\n`;
+		if (order.call) msg += `📞 Телефонний дзвінок: ${escapeHtml(order.call)}\n`;
+		msg += `\n`;
+
+		// 3) Товари
+		if (Array.isArray(order.items) && order.items.length > 0) {
+			msg += `<b>🛒 Список товарів:</b>\n`;
+			let orderTotal = 0;
+
+			order.items.forEach((item, idx) => {
+				const qty = Number(item?.qty) || 0;
+				const price = Number(item?.discounted_price) || 0;
+				const total = qty * price;
+				orderTotal += total;
+
+				msg += `\n${idx + 1}. <b>${escapeHtml(item?.text ?? "")}</b>`;
+				if (item?.article)
+					msg += `\n   🔖 Артикул: ${escapeHtml(item.article)}`;
+				if (item?.description)
+					msg += `\n   📝 Опис: ${escapeHtml(item.description)}`;
+				if (qty) msg += `\n   📦 Кількість: ${qty}`;
+				if (item?.wage) msg += `\n   ⚖️ Вага: ${escapeHtml(item.wage)}`;
+				if (price) msg += `\n   💲 Ціна: ${price.toFixed(2)} грн`;
+				if (qty && price)
+					msg += `\n   💰 Разом: <b>${total.toFixed(2)} грн</b>`;
+				msg += `\n`;
+			});
+
+			if (orderTotal > 0) {
+				msg += `\n<b>🔢 Підсумок: ${orderTotal.toFixed(2)} грн</b>\n`;
+			}
+		} else {
+			msg += `❌ Товари не вказані\n`;
+		}
+
+		// 4) Надсилання у Telegram (з урахуванням 4096)
+		await chunkAndSend(env("TELEGRAM_CHAT_ID"), msg);
+
+		// 5) Оновлення sales_report як у поштовому варіанті
+		if (Array.isArray(order.items)) {
+			for (const item of order.items) {
+				const { id, qty } = item || {};
+				const qtyNum = Number(qty);
+				if (!id || Number.isNaN(qtyNum)) continue;
+
+				await FillersCollection.findByIdAndUpdate(
+					id,
+					{ $inc: { sales_report: qtyNum } },
+					{ new: true }
+				);
+			}
+		}
+	} catch (error) {
+		console.error("❌ Помилка при обробці замовлення:", error);
+		throw error;
 	}
 };
