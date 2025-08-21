@@ -20,7 +20,8 @@ const setupServer = () => {
 	// app.use(cors());
 	app.use(
 		cors({
-			origin: "https://pan-sirko.vercel.app",
+			// origin: "https://pan-sirko.vercel.app",
+			origin: "http://45.154.116.149",
 			// origin: "http://localhost:3001",
 			credentials: true, // ← дозволити куки
 		})
