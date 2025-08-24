@@ -29,6 +29,7 @@ const setupServer = () => {
 					"https://pan-sirko.com.ua",
 					"http://www.pan-sirko.com.ua",
 					"https://www.pan-sirko.com.ua",
+					"https://pan-sirko.vercel.app",
 				];
 				if (
 					!origin ||
