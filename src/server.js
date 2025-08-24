@@ -23,6 +23,8 @@ const setupServer = () => {
 		"http://45.154.116.149",
 		"http://pan-sirko.com.ua",
 		"https://pan-sirko.com.ua",
+		"http://www.pan-sirko.com.ua",
+		"https://www.pan-sirko.com.ua",
 	];
 
 	app.use(
