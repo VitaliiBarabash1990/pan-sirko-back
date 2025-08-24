@@ -18,10 +18,34 @@ const setupServer = () => {
 
 	app.use(express.json());
 	// app.use(cors());
+
+	const allowedOrigins = [
+		"http://localhost:3001",
+		"http://45.154.116.149",
+		"http://pan-sirko.com.ua",
+		"https://pan-sirko.com.ua",
+		"http://www.pan-sirko.com.ua",
+		"https://www.pan-sirko.com.ua",
+	];
+
 	app.use(
 		cors({
-			origin: "https://pan-sirko.vercel.app",
-			// origin: "http://localhost:3001",
+			origin: (origin, callback) => {
+				const allowedOrigins = [
+					"http://localhost:3000",
+					"http://45.154.116.149",
+					"http://pan-sirko.com.ua",
+					"https://pan-sirko.com.ua",
+				];
+				if (
+					!origin ||
+					allowedOrigins.some((allowed) => origin.startsWith(allowed))
+				) {
+					callback(null, true);
+				} else {
+					callback(new Error("Not allowed by CORS"));
+				}
+			},
 			credentials: true, // ← дозволити куки
 		})
 	);
