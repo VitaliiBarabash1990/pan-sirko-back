@@ -19,23 +19,16 @@ const setupServer = () => {
 	app.use(express.json());
 	// app.use(cors());
 
-	const allowedOrigins = [
-		"http://localhost:3001",
-		"http://45.154.116.149",
-		"http://pan-sirko.com.ua",
-		"https://pan-sirko.com.ua",
-		"http://www.pan-sirko.com.ua",
-		"https://www.pan-sirko.com.ua",
-	];
-
 	app.use(
 		cors({
 			origin: (origin, callback) => {
 				const allowedOrigins = [
-					"http://localhost:3000",
+					"http://localhost:3001",
 					"http://45.154.116.149",
 					"http://pan-sirko.com.ua",
 					"https://pan-sirko.com.ua",
+					"http://www.pan-sirko.com.ua",
+					"https://www.pan-sirko.com.ua",
 				];
 				if (
 					!origin ||
