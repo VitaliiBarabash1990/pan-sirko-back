@@ -19,18 +19,20 @@ const setupServer = () => {
 	app.use(express.json());
 	// app.use(cors());
 
+	const allowedOrigins = [
+		"http://localhost:3001",
+		"http://45.154.116.149",
+		"http://pan-sirko.com.ua",
+		"https://pan-sirko.com.ua",
+		"http://www.pan-sirko.com.ua",
+		"https://www.pan-sirko.com.ua",
+		"https://pan-sirko.vercel.app",
+	];
+
 	app.use(
 		cors({
 			origin: (origin, callback) => {
-				const allowedOrigins = [
-					"http://localhost:3001",
-					"http://45.154.116.149",
-					"http://pan-sirko.com.ua",
-					"https://pan-sirko.com.ua",
-					"http://www.pan-sirko.com.ua",
-					"https://www.pan-sirko.com.ua",
-					"https://pan-sirko.vercel.app",
-				];
+				// дозволити без origin (Postman, сервер-сервер) або зі списку
 				if (
 					!origin ||
 					allowedOrigins.some((allowed) => origin.startsWith(allowed))
@@ -40,9 +42,15 @@ const setupServer = () => {
 					callback(new Error("Not allowed by CORS"));
 				}
 			},
-			credentials: true, // ← дозволити куки
+			credentials: true, // дозволяємо передавати куки/заголовки авторизації
+			methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+			allowedHeaders: ["Content-Type", "Authorization"],
 		})
 	);
+
+	// Обробка preflight-запитів (OPTIONS)
+	app.options("*", cors());
+
 	app.use(cookieParser());
 
 	app.use(
